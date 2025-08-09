@@ -14,7 +14,7 @@ function createStreamingResponse(stream: ReadableStream) {
 
 export async function POST(request: NextRequest) {
   try {
-    const { message, files, apiKey, model = "gpt-4o-mini", stream = true } = await request.json();
+    const { message, files, memoryContext, apiKey, model = "gpt-4o-mini", stream = true } = await request.json();
 
     // Validate required fields
     if (!message && (!files || files.length === 0)) {
@@ -36,6 +36,14 @@ export async function POST(request: NextRequest) {
 
     // Build messages array for chat completions API (more standard approach)
     const messages: any[] = [];
+
+    // Add memory context as system message if available
+    if (memoryContext && memoryContext.trim()) {
+      messages.push({
+        role: "system",
+        content: `${memoryContext.trim()}`
+      });
+    }
 
     // Build content array for the current message
     const content: any[] = [];

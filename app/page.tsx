@@ -32,6 +32,8 @@ import {
   Save
 } from "lucide-react";
 import { MarkdownRenderer } from "@/components/markdown-renderer";
+import { chatMemory } from "@/lib/chat-memory";
+import { Brain, History } from "lucide-react";
 
 interface Message {
   id: string;
@@ -116,10 +118,13 @@ export default function Home() {
     }
   }, [chats]);
 
-  // Save current chat messages whenever messages change
+  // Save current chat messages and update memory whenever messages change
   useEffect(() => {
     if (currentChatId && messages.length > 0) {
       localStorage.setItem(`openai_chat_messages_${currentChatId}`, JSON.stringify(messages));
+      
+      // Update chat memory
+      chatMemory.updateMemory(currentChatId, messages);
       
       // Update the chat's last message and timestamp
       setChats(prev => prev.map(chat => {
@@ -428,6 +433,9 @@ export default function Home() {
     setMessages(prev => [...prev, assistantMessage]);
 
     try {
+      // Load memory context if available
+      const memoryContext = currentChatId ? chatMemory.loadContext(currentChatId) : '';
+      
       const response = await fetch('/api/chat', {
         method: 'POST',
         headers: {
@@ -436,6 +444,7 @@ export default function Home() {
         body: JSON.stringify({
           message: currentMessage,
           files: uploadedFiles.length > 0 ? uploadedFiles : undefined,
+          memoryContext: memoryContext,
           apiKey: apiKey.trim(),
           model: selectedModel,
           stream: true
@@ -552,6 +561,18 @@ export default function Home() {
           {/* Messages Area */}
           {messages.length > 0 ? (
             <div className="flex-1 overflow-y-auto mb-6 space-y-4 hide-scrollbar">
+              {/* Memory Status Indicator */}
+              {currentChatId && (() => {
+                const memoryStatus = chatMemory.getMemoryStatus(currentChatId);
+                return memoryStatus.hasMemory && (
+                  <div className="flex justify-center mb-4">
+                    <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-blue-500/10 border border-blue-500/20 rounded-lg text-blue-200 text-xs">
+                      <Brain className="w-3 h-3" />
+                      <span>Memory active • {memoryStatus.messageCount} messages remembered</span>
+                    </div>
+                  </div>
+                );
+              })()}
               {messages.map((msg) => (
                 <div key={msg.id} className="flex justify-start">
                   <div className="flex gap-3 max-w-[80%]">
