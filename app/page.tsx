@@ -1,103 +1,623 @@
-import Image from "next/image";
+"use client";
+
+import { useState, useEffect } from "react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
+import { ModelSelector } from "@/components/model-selector";
+import { ChatSidebar, type Chat } from "@/components/chat-sidebar";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog";
+import { 
+  MessageSquare, 
+  Lightbulb, 
+  Code, 
+  BookOpen, 
+  Zap, 
+  Settings,
+  ArrowUp,
+  Plus,
+  Sparkles,
+  File,
+  X,
+  User,
+  Bot,
+  Loader2,
+  Key,
+  Save
+} from "lucide-react";
+
+interface Message {
+  id: string;
+  role: 'user' | 'assistant';
+  content: string;
+  timestamp: Date;
+  files?: Array<{
+    name: string;
+    type: string;
+    size: number;
+    content: string;
+    id: string;
+  }>;
+}
 
 export default function Home() {
-  return (
-    <div className="font-sans grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="font-mono list-inside list-decimal text-sm/6 text-center sm:text-left">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] font-mono font-semibold px-1 py-0.5 rounded">
-              app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
+  const [message, setMessage] = useState("");
+  const [messages, setMessages] = useState<Message[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [apiKey, setApiKey] = useState<string>("");
+  const [selectedModel, setSelectedModel] = useState("gpt-4o-mini");
+  const [uploadedFiles, setUploadedFiles] = useState<Array<{
+    name: string;
+    type: string;
+    size: number;
+    content: string;
+    id: string;
+  }>>([]);
+  const [showSettings, setShowSettings] = useState(false);
+  const [tempApiKey, setTempApiKey] = useState("");
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
-        </div>
-      </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
+  // Load API key from localStorage on component mount
+  useEffect(() => {
+    const savedApiKey = localStorage.getItem('openai_api_key');
+    if (savedApiKey) {
+      setApiKey(savedApiKey);
+    }
+  }, []);
+
+  // Save API key to localStorage
+  const saveApiKey = (key: string) => {
+    if (key.trim()) {
+      localStorage.setItem('openai_api_key', key.trim());
+      setApiKey(key.trim());
+    } else {
+      localStorage.removeItem('openai_api_key');
+      setApiKey("");
+    }
+  };
+
+  // Handle settings modal
+  const handleOpenSettings = () => {
+    setTempApiKey(apiKey);
+    setShowSettings(true);
+  };
+
+  const handleSaveSettings = () => {
+    saveApiKey(tempApiKey);
+    setShowSettings(false);
+  };
+
+  const handleCancelSettings = () => {
+    setTempApiKey(apiKey);
+    setShowSettings(false);
+  };
+  
+  const quickActions = [
+    
+    {
+      icon: Code,
+      label: "Code",
+      description: "Programming help"
+    },
+    {
+      icon: Lightbulb,
+      label: "Ideas",
+      description: "Creative thinking"
+    },
+    {
+      icon: BookOpen,
+      label: "Learn",
+      description: "Explain concepts"
+    },
+    {
+      icon: Zap,
+      label: "Quick Task",
+      description: "Fast assistance"
+    }
+  ];
+
+  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const files = event.target.files;
+    if (!files) return;
+
+    Array.from(files).forEach((file) => {
+      const reader = new FileReader();
+      
+      reader.onload = (e) => {
+        const content = e.target?.result as string;
+        const newFile = {
+          id: Date.now().toString() + Math.random().toString(36).substr(2, 9),
+          name: file.name,
+          type: file.type,
+          size: file.size,
+          content: content
+        };
+        
+        setUploadedFiles(prev => [...prev, newFile]);
+      };
+      
+      // Handle different file types
+      if (file.type.startsWith('text/') || 
+          file.name.endsWith('.txt') || 
+          file.name.endsWith('.md') || 
+          file.name.endsWith('.csv') ||
+          file.name.endsWith('.json') ||
+          file.name.endsWith('.xml') ||
+          file.name.endsWith('.html') ||
+          file.name.endsWith('.css') ||
+          file.name.endsWith('.js') ||
+          file.name.endsWith('.ts') ||
+          file.name.endsWith('.py') ||
+          file.name.endsWith('.java') ||
+          file.name.endsWith('.cpp') ||
+          file.name.endsWith('.c') ||
+          file.name.endsWith('.php') ||
+          file.name.endsWith('.rb') ||
+          file.name.endsWith('.go') ||
+          file.name.endsWith('.rs')) {
+        reader.readAsText(file);
+      } else if (file.type === 'application/pdf') {
+        // For PDF files, we'll read as data URL and handle on server
+        reader.readAsDataURL(file);
+      } else {
+        // For other files, try to read as text first
+        reader.readAsText(file);
+      }
+    });
+
+    // Reset the input
+    event.target.value = '';
+  };
+
+  const removeFile = (fileId: string) => {
+    setUploadedFiles(prev => prev.filter(file => file.id !== fileId));
+  };
+
+  const handleSendMessage = async () => {
+    if ((!message.trim() && uploadedFiles.length === 0) || isLoading) return;
+
+    if (!apiKey.trim()) {
+      alert("Please add your OpenAI API key first");
+      return;
+    }
+
+    const userMessage: Message = {
+      id: Date.now().toString(),
+      role: 'user',
+      content: message,
+      timestamp: new Date(),
+      files: uploadedFiles.length > 0 ? uploadedFiles : undefined
+    };
+
+    setMessages(prev => [...prev, userMessage]);
+    setMessage("");
+    setIsLoading(true);
+
+    try {
+      const response = await fetch('/api/chat', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          message: message.trim(),
+          files: uploadedFiles.length > 0 ? uploadedFiles : undefined,
+          apiKey: apiKey.trim(),
+          model: selectedModel
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to send message');
+      }
+
+      if (data.success) {
+        const assistantMessage: Message = {
+          id: Date.now().toString() + '_assistant',
+          role: 'assistant',
+          content: data.message,
+          timestamp: new Date()
+        };
+
+        setMessages(prev => [...prev, assistantMessage]);
+      } else {
+        throw new Error(data.error || 'Failed to get response');
+      }
+    } catch (error: any) {
+      console.error('Chat error:', error);
+      const errorMessage: Message = {
+        id: Date.now().toString() + '_error',
+        role: 'assistant',
+        content: `Error: ${error.message || 'Something went wrong. Please try again.'}`,
+        timestamp: new Date()
+      };
+      setMessages(prev => [...prev, errorMessage]);
+    } finally {
+      setIsLoading(false);
+      setUploadedFiles([]);
+    }
+  };
+
+  const handleKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      handleSendMessage();
+    }
+  };
+
+  // Sample chat data for demonstration
+  const sampleChats: Chat[] = [
+    {
+      id: "1",
+      title: "Getting Started with React",
+      lastMessage: "How do I create a new React component?",
+      timestamp: new Date(Date.now() - 1000 * 60 * 30), // 30 minutes ago
+      isActive: true
+    },
+    {
+      id: "2", 
+      title: "Python Data Analysis",
+      lastMessage: "Can you help me analyze this CSV file?",
+      timestamp: new Date(Date.now() - 1000 * 60 * 60 * 2), // 2 hours ago
+    },
+    {
+      id: "3",
+      title: "UI/UX Design Tips",
+      lastMessage: "What are the best practices for modern web design?",
+      timestamp: new Date(Date.now() - 1000 * 60 * 60 * 24), // 1 day ago
+    }
+  ];
+
+  return (
+    <div className="h-screen bg-gradient-to-br from-slate-900 via-gray-900 to-slate-800 flex overflow-hidden">
+      {/* Sidebar */}
+      <ChatSidebar 
+        initialChats={sampleChats}
+        className="h-full flex-shrink-0"
+        onSettingsClick={handleOpenSettings}
+      />
+      
+      {/* Main Content Area */}
+      <div className="flex-1 flex flex-col h-full">
+        {/* Main Content */}
+        <main className="flex-1 flex flex-col px-6 py-4 max-w-4xl mx-auto w-full min-h-0">
+          {/* Messages Area */}
+          {messages.length > 0 ? (
+            <div className="flex-1 overflow-y-auto mb-6 space-y-4">
+              {messages.map((msg) => (
+                <div key={msg.id} className="flex justify-start">
+                  <div className="flex gap-3 max-w-[80%]">
+                    <div className="flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center bg-slate-700">
+                      {msg.role === 'user' ? (
+                        <User className="w-4 h-4 text-white" />
+                      ) : (
+                        <Bot className="w-4 h-4 text-white" />
+                      )}
+                    </div>
+                    <div className="rounded-2xl px-4 py-3 text-slate-100">
+                      <div className="text-sm leading-relaxed whitespace-pre-wrap">
+                        {msg.content}
+                      </div>
+                      {msg.files && msg.files.length > 0 && (
+                        <div className="mt-2 flex flex-wrap gap-2">
+                          {msg.files.map((file) => (
+                            <div key={file.id} className="inline-flex items-center gap-1 px-2 py-1 bg-slate-700/50 rounded text-xs">
+                              <File className="w-3 h-3" />
+                              <span>{file.name}</span>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                      <div className={`text-xs mt-2 ${
+                        msg.role === 'user' ? 'text-blue-200' : 'text-slate-400'
+                      }`}>
+                        {msg.timestamp.toLocaleTimeString()}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ))}
+              {isLoading && (
+                <div className="flex justify-start">
+                  <div className="flex gap-3 max-w-[80%]">
+                    <div className="flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center bg-slate-700">
+                      <Bot className="w-4 h-4 text-white" />
+                    </div>
+                    <div className="rounded-2xl px-4 py-3 bg-slate-800/50 border border-slate-700/50">
+                      <div className="flex items-center gap-2 text-slate-300">
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                        <span className="text-sm">Thinking...</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+          ) : (
+            /* Welcome Section */
+            <div className="flex-1 flex flex-col items-center justify-center">
+              <div className="text-center mb-12">
+                <div className="mb-6">
+                  <h1 className="text-2xl md:text-3xl font-semibold text-white mb-2">
+                    Welcome to OpenGPT
+                  </h1>
+                  <div className="flex items-center justify-center gap-1 mt-2">
+                    {[...Array(3)].map((_, i) => (
+                      <div
+                        key={i}
+                        className="w-1 h-1 bg-slate-600 rounded-full animate-pulse"
+                        style={{ animationDelay: `${i * 200}ms` }}
+                      ></div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              {/* Chat Input Section - Centered on welcome */}
+              <div className="w-full max-w-3xl mb-8">
+                {/* Uploaded Files Display */}
+                {uploadedFiles.length > 0 && (
+                  <div className="mb-3 flex flex-wrap gap-2">
+                    {uploadedFiles.map((file) => (
+                      <div
+                        key={file.id}
+                        className="inline-flex items-center gap-2 px-3 py-1 bg-slate-700/50 border border-slate-600/50 rounded-lg text-slate-300 text-sm"
+                      >
+                        <File className="w-3 h-3" />
+                        <span className="truncate max-w-32">{file.name}</span>
+                        <button
+                          onClick={() => removeFile(file.id)}
+                          className="text-slate-400 hover:text-red-400 transition-colors"
+                        >
+                          <X className="w-3 h-3" />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+                
+                <div className="relative bg-slate-800/40 backdrop-blur-xl rounded-3xl border border-slate-700/30 shadow-2xl">
+                  <div className="flex items-center p-4 gap-3">
+                    <div className="relative">
+                      <Button 
+                        variant="ghost" 
+                        size="icon" 
+                        className="text-slate-400 hover:text-white hover:bg-slate-700/30 rounded-xl h-10 w-10 flex-shrink-0"
+                        onClick={() => document.getElementById('file-upload')?.click()}
+                      >
+                        <Plus className="w-5 h-5" />
+                      </Button>
+                      <input
+                        id="file-upload"
+                        type="file"
+                        multiple
+                        accept=".txt,.pdf,.csv,.md,.json,.xml,.html,.css,.js,.ts,.py,.java,.cpp,.c,.php,.rb,.go,.rs,.doc,.docx,.xls,.xlsx"
+                        onChange={handleFileUpload}
+                        className="hidden"
+                      />
+                    </div>
+                    
+                    <div className="flex-1 min-w-0">
+                      <input
+                        type="text"
+                        placeholder="How can I help you today?"
+                        value={message}
+                        onChange={(e) => setMessage(e.target.value)}
+                        onKeyPress={handleKeyPress}
+                        className="w-full bg-transparent text-white placeholder-slate-400 text-lg border-none outline-none resize-none focus:text-white"
+                        style={{ color: 'white' }}
+                      />
+                    </div>
+                    
+                    <div className="flex items-center gap-3 flex-shrink-0">
+                      <ModelSelector 
+                        apiKey={apiKey || undefined}
+                        selectedModel={selectedModel}
+                        onModelSelect={setSelectedModel}
+                      />
+                      <Button
+                        onClick={handleSendMessage}
+                        disabled={!message.trim() && uploadedFiles.length === 0}
+                        size="icon"
+                        className="bg-slate-600/50 hover:bg-slate-500/50 disabled:opacity-30 disabled:cursor-not-allowed rounded-xl h-10 w-10 text-slate-300 hover:text-white transition-colors"
+                      >
+                        <ArrowUp className="w-4 h-4" />
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Quick Actions */}
+              <div className="flex flex-wrap justify-center gap-3 mb-12">
+                {quickActions.map((action) => (
+                  <Button
+                    key={action.label}
+                    variant="secondary"
+                    className="bg-slate-800/50 hover:bg-slate-700/50 border border-slate-700/50 text-slate-300 hover:text-white backdrop-blur-sm transition-all duration-200 h-auto p-4 flex flex-col items-center gap-2 min-w-[120px]"
+                    onClick={() => setMessage(action.label === 'Chat' ? '' : `Help me with ${action.label.toLowerCase()}: `)}
+                  >
+                    <action.icon className="w-5 h-5" />
+                    <div className="text-center">
+                      <div className="font-medium text-sm">{action.label}</div>
+                      <div className="text-xs text-slate-400">{action.description}</div>
+                    </div>
+                  </Button>
+                ))}
+              </div>
+
+              {/* API Key Status */}
+              <div className="text-center">
+                {!apiKey ? (
+                  <div className="inline-flex items-center gap-2 px-4 py-2 bg-amber-500/10 border border-amber-500/20 rounded-lg">
+                    <div className="w-2 h-2 bg-amber-500 rounded-full animate-pulse"></div>
+                    <span className="text-amber-200 text-sm">
+                      No API key configured • 
+                      <button 
+                        className="text-amber-400 hover:underline ml-1"
+                        onClick={() => {
+                          const key = prompt("Enter your OpenAI API Key:");
+                          if (key && key.trim()) {
+                            setApiKey(key.trim());
+                          }
+                        }}
+                      >
+                        Add your OpenAI API key
+                      </button>
+                    </span>
+                  </div>
+                ) : (
+                  <div className="inline-flex items-center gap-2 px-4 py-2 bg-green-500/10 border border-green-500/20 rounded-lg">
+                    <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                    <span className="text-green-200 text-sm">
+                      API key configured • 
+                      <button 
+                        className="text-green-400 hover:underline ml-1"
+                        onClick={() => setApiKey("")}
+                      >
+                        Remove
+                      </button>
+                    </span>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* Chat Input Section - Only at bottom when there are messages */}
+          {messages.length > 0 && (
+            <div className="w-full max-w-3xl mx-auto">
+              {/* Uploaded Files Display */}
+              {uploadedFiles.length > 0 && (
+                <div className="mb-3 flex flex-wrap gap-2">
+                  {uploadedFiles.map((file) => (
+                    <div
+                      key={file.id}
+                      className="inline-flex items-center gap-2 px-3 py-1 bg-slate-700/50 border border-slate-600/50 rounded-lg text-slate-300 text-sm"
+                    >
+                      <File className="w-3 h-3" />
+                      <span className="truncate max-w-32">{file.name}</span>
+                      <button
+                        onClick={() => removeFile(file.id)}
+                        className="text-slate-400 hover:text-red-400 transition-colors"
+                      >
+                        <X className="w-3 h-3" />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+              
+              <div className="relative bg-slate-800/40 backdrop-blur-xl rounded-3xl border border-slate-700/30 shadow-2xl">
+                <div className="flex items-center p-4 gap-3">
+                  <div className="relative">
+                    <Button 
+                      variant="ghost" 
+                      size="icon" 
+                      className="text-slate-400 hover:text-white hover:bg-slate-700/30 rounded-xl h-10 w-10 flex-shrink-0"
+                      onClick={() => document.getElementById('file-upload-chat')?.click()}
+                    >
+                      <Plus className="w-5 h-5" />
+                    </Button>
+                    <input
+                      id="file-upload-chat"
+                      type="file"
+                      multiple
+                      accept=".txt,.pdf,.csv,.md,.json,.xml,.html,.css,.js,.ts,.py,.java,.cpp,.c,.php,.rb,.go,.rs,.doc,.docx,.xls,.xlsx"
+                      onChange={handleFileUpload}
+                      className="hidden"
+                    />
+                  </div>
+                  
+                  <div className="flex-1 min-w-0">
+                    <input
+                      type="text"
+                      placeholder="How can I help you today?"
+                      value={message}
+                      onChange={(e) => setMessage(e.target.value)}
+                      onKeyPress={handleKeyPress}
+                      className="w-full bg-transparent text-white placeholder-slate-400 text-lg border-none outline-none resize-none focus:text-white"
+                      style={{ color: 'white' }}
+                    />
+                  </div>
+                  
+                  <div className="flex items-center gap-3 flex-shrink-0">
+                    <ModelSelector 
+                      apiKey={apiKey || undefined}
+                      selectedModel={selectedModel}
+                      onModelSelect={setSelectedModel}
+                    />
+                    <Button
+                      onClick={handleSendMessage}
+                      disabled={!message.trim() && uploadedFiles.length === 0}
+                      size="icon"
+                      className="bg-slate-600/50 hover:bg-slate-500/50 disabled:opacity-30 disabled:cursor-not-allowed rounded-xl h-10 w-10 text-slate-300 hover:text-white transition-colors"
+                    >
+                      <ArrowUp className="w-4 h-4" />
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+        </main>
+
+        {/* Footer */}
+        <footer className="px-6 py-2 text-center">
+          <p className="text-slate-600 text-xs">
+            OpenGPT is an open-source project. Your API key stays secure on your device.
+          </p>
+        </footer>
+      </div>
+
+      {/* Settings Modal */}
+      <Dialog open={showSettings} onOpenChange={setShowSettings}>
+        <DialogContent className="bg-slate-900 border border-slate-700">
+          <DialogHeader>
+            <DialogTitle className="text-white flex items-center gap-2">
+              <Key className="w-5 h-5" />
+              Settings
+            </DialogTitle>
+            <DialogDescription className="text-slate-400">
+              Configure your OpenAI API key. It will be stored securely in your browser's local storage.
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-white">OpenAI API Key</label>
+              <Input
+                type="password"
+                placeholder="sk-..."
+                value={tempApiKey}
+                onChange={(e) => setTempApiKey(e.target.value)}
+                className="bg-slate-800 border-slate-600 text-white placeholder-slate-400"
+              />
+              <p className="text-xs text-slate-500"> 
+                Get your key from <a href="https://platform.openai.com/api-keys" target="_blank" className="text-slate-400 hover:underline">OpenAI Platform</a>.
+              </p>
+            </div>
+          </div>
+
+          <div className="flex justify-end gap-2">
+            <Button variant="outline" onClick={handleCancelSettings} className="border-slate-600 text-slate-300 hover:bg-slate-800">
+              Cancel
+            </Button>
+            <Button onClick={handleSaveSettings} className="bg-slate-600 hover:bg-slate-700 text-white">
+              <Save className="w-4 h-4 mr-2" />
+              Save
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

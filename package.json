@@ -2,6 +2,7 @@
   "name": "opengpt",
   "version": "0.1.0",
   "private": true,
+  "description": "Make AI accessible to everyone by providing a free, open-source ChatGPT interface where users can use their own OpenAI API keys.",
   "scripts": {
     "dev": "next dev --turbopack",
     "build": "next build",
@@ -39,6 +40,7 @@
     "clsx": "^2.1.1",
     "cmdk": "^1.1.1",
     "date-fns": "^4.1.0",
+    "dotenv": "^17.2.1",
     "embla-carousel-react": "^8.6.0",
     "input-otp": "^1.4.2",
     "lucide-react": "^0.539.0",
@@ -53,7 +55,8 @@
     "sonner": "^2.0.7",
     "tailwind-merge": "^3.3.1",
     "vaul": "^1.1.2",
-    "zod": "^4.0.16"
+    "zod": "^3.23.8",
+    "openai":"^5.12.2"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
