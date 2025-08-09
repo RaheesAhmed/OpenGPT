@@ -177,4 +177,150 @@
     scrollbar-width: thin;
     scrollbar-color: rgb(71 85 105 / 0.8) rgb(30 41 59 / 0.3);
   }
+
+  /* Hide scrollbar while keeping scroll functionality */
+  .hide-scrollbar::-webkit-scrollbar,
+  .hide-scrollbar *::-webkit-scrollbar {
+    display: none !important;
+    width: 0 !important;
+    height: 0 !important;
+  }
+
+  .hide-scrollbar,
+  .hide-scrollbar * {
+    -ms-overflow-style: none !important;  /* IE and Edge */
+    scrollbar-width: none !important;  /* Firefox */
+  }
+
+  /* Hide scrollbars globally on main content areas */
+  .hide-scrollbar ::-webkit-scrollbar {
+    display: none !important;
+  }
+
+  /* Enhanced markdown styling for ChatGPT-like appearance */
+  .markdown-content {
+    font-feature-settings: "kern" 1, "liga" 1, "calt" 1;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  .markdown-content pre {
+    font-feature-settings: "liga" 0;
+  }
+
+  .markdown-content code {
+    font-feature-settings: "liga" 0;
+  }
+
+  /* Custom scrollbar for code blocks */
+  .markdown-content pre::-webkit-scrollbar {
+    height: 8px;
+    width: 8px;
+  }
+
+  .markdown-content pre::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.1);
+    border-radius: 4px;
+  }
+
+  .markdown-content pre::-webkit-scrollbar-thumb {
+    background: rgba(148, 163, 184, 0.3);
+    border-radius: 4px;
+  }
+
+  .markdown-content pre::-webkit-scrollbar-thumb:hover {
+    background: rgba(148, 163, 184, 0.5);
+  }
+
+  /* Enhanced list styling */
+  .markdown-content ul ul,
+  .markdown-content ol ul,
+  .markdown-content ul ol,
+  .markdown-content ol ol {
+    margin-top: 8px;
+    margin-bottom: 8px;
+  }
+
+  /* Better spacing for nested elements */
+  .markdown-content li > p {
+    margin-bottom: 8px;
+  }
+
+  .markdown-content li > p:last-child {
+    margin-bottom: 0;
+  }
+
+  /* Code syntax highlighting matching ChatGPT */
+  .markdown-content .hljs {
+    background: transparent !important;
+    color: #ffffff !important;
+  }
+
+  .markdown-content .hljs-keyword {
+    color: #569cd6 !important;
+    font-weight: normal;
+  }
+
+  .markdown-content .hljs-built_in {
+    color: #569cd6 !important;
+  }
+
+  .markdown-content .hljs-string {
+    color: #ce9178 !important;
+  }
+
+  .markdown-content .hljs-function {
+    color: #dcdcaa !important;
+  }
+
+  .markdown-content .hljs-comment {
+    color: #6a9955 !important;
+    font-style: italic;
+  }
+
+  .markdown-content .hljs-number {
+    color: #b5cea8 !important;
+  }
+
+  .markdown-content .hljs-title {
+    color: #dcdcaa !important;
+    font-weight: normal;
+  }
+
+  .markdown-content .hljs-variable {
+    color: #9cdcfe !important;
+  }
+
+  .markdown-content .hljs-attr {
+    color: #92c5f8 !important;
+  }
+
+  .markdown-content .hljs-tag {
+    color: #569cd6 !important;
+  }
+
+  .markdown-content .hljs-name {
+    color: #4fc1ff !important;
+  }
+
+  .markdown-content .hljs-params {
+    color: #9cdcfe !important;
+  }
+
+  .markdown-content .hljs-literal {
+    color: #569cd6 !important;
+  }
+
+  .markdown-content .hljs-meta {
+    color: #9cdcfe !important;
+  }
+
+  /* Better code block styling */
+  .markdown-content pre code {
+    font-family: 'SF Mono', Monaco, 'Cascadia Code', 'Roboto Mono', Consolas, 'Courier New', monospace;
+    font-size: 14px;
+    line-height: 1.5;
+    color: #ffffff;
+  }
 }

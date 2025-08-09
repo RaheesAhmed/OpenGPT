@@ -1,9 +1,20 @@
 import { NextRequest, NextResponse } from "next/server";
 import OpenAI from "openai";
 
+// Helper function to create a streaming response
+function createStreamingResponse(stream: ReadableStream) {
+  return new NextResponse(stream, {
+    headers: {
+      'Content-Type': 'text/stream',
+      'Cache-Control': 'no-cache',
+      'Connection': 'keep-alive',
+    },
+  });
+}
+
 export async function POST(request: NextRequest) {
   try {
-    const { message, files, apiKey, model = "gpt-4o-mini" } = await request.json();
+    const { message, files, apiKey, model = "gpt-4o-mini", stream = true } = await request.json();
 
     // Validate required fields
     if (!message && (!files || files.length === 0)) {
@@ -23,13 +34,16 @@ export async function POST(request: NextRequest) {
     // Initialize OpenAI with user's API key
     const openai = new OpenAI({ apiKey });
 
-    // Build the content array for the input
+    // Build messages array for chat completions API (more standard approach)
+    const messages: any[] = [];
+
+    // Build content array for the current message
     const content: any[] = [];
 
     // Add text message if provided
     if (message && message.trim()) {
       content.push({
-        type: "input_text",
+        type: "text",
         text: message.trim()
       });
     }
@@ -40,60 +54,96 @@ export async function POST(request: NextRequest) {
         if (file.type?.startsWith('image/')) {
           // Handle image files
           content.push({
-            type: "input_image",
-            image_url: file.content // Base64 data URL
-          });
-        } else if (file.type === 'application/pdf' || file.name?.endsWith('.pdf')) {
-          // Handle PDF files
-          content.push({
-            type: "input_file",
-            file_url: file.content // Base64 data URL or file path
+            type: "image_url",
+            image_url: {
+              url: file.content, // Base64 data URL
+              detail: "auto"
+            }
           });
         } else {
-          // Handle other text files by adding their content as text
+          // Handle text files by adding their content as text
           content.push({
-            type: "input_text",
+            type: "text",
             text: `File: ${file.name}\n\n${file.content}`
           });
         }
       });
     }
 
-    // Create the response using the new OpenAI API
-    const response = await openai.responses.create({
-      model,
-      input: [
-        {
-          role: "user",
-          content
-        }
-      ],
-      tools: [{ type: "web_search_preview" }],
+    messages.push({
+      role: "user",
+      content: content.length === 1 && content[0].type === "text" ? content[0].text : content
     });
 
-    // Extract the text content from the new responses API structure
-    let messageText = "No response received";
-    
-    if (response.output && response.output.length > 0) {
-      const firstOutput = response.output[0];
-      // Check if this is a message type output (not a tool call)
-      if (firstOutput.type === "message" && "content" in firstOutput) {
-        const messageOutput = firstOutput as any; // Type assertion to access content
-        if (messageOutput.content && messageOutput.content.length > 0) {
-          // Find the output_text content
-          const textContent = messageOutput.content.find((item: any) => item.type === "output_text");
-          if (textContent && textContent.text) {
-            messageText = textContent.text;
+    if (stream) {
+      // Create streaming response
+      const streamResponse = await openai.chat.completions.create({
+        model,
+        messages,
+        stream: true,
+        temperature: 0.7,
+        max_tokens: 4000,
+      });
+
+      // Create a ReadableStream to handle the streaming response
+      const readableStream = new ReadableStream({
+        async start(controller) {
+          const encoder = new TextEncoder();
+          
+          try {
+            for await (const chunk of streamResponse) {
+              const delta = chunk.choices[0]?.delta?.content || '';
+              
+              if (delta) {
+                // Send the text chunk as server-sent event
+                const data = JSON.stringify({
+                  type: 'content',
+                  content: delta
+                });
+                controller.enqueue(encoder.encode(`data: ${data}\n\n`));
+              }
+              
+              // Check if streaming is finished
+              if (chunk.choices[0]?.finish_reason) {
+                const finishData = JSON.stringify({
+                  type: 'done',
+                  finish_reason: chunk.choices[0].finish_reason
+                });
+                controller.enqueue(encoder.encode(`data: ${finishData}\n\n`));
+                break;
+              }
+            }
+          } catch (error) {
+            console.error('Streaming error:', error);
+            const errorData = JSON.stringify({
+              type: 'error',
+              error: error instanceof Error ? error.message : 'Unknown error'
+            });
+            controller.enqueue(encoder.encode(`data: ${errorData}\n\n`));
+          } finally {
+            controller.close();
           }
-        }
-      }
-    }
+        },
+      });
 
-    return NextResponse.json({
-      success: true,
-      message: messageText,
-      usage: response.usage
-    });
+      return createStreamingResponse(readableStream);
+    } else {
+      // Non-streaming response (fallback)
+      const response = await openai.chat.completions.create({
+        model,
+        messages,
+        temperature: 0.7,
+        max_tokens: 4000,
+      });
+
+      const messageText = response.choices[0]?.message?.content || "No response received";
+
+      return NextResponse.json({
+        success: true,
+        message: messageText,
+        usage: response.usage
+      });
+    }
 
   } catch (error: any) {
     console.error("Chat API Error:", error);

@@ -31,6 +31,7 @@ import {
   Key,
   Save
 } from "lucide-react";
+import { MarkdownRenderer } from "@/components/markdown-renderer";
 
 interface Message {
   id: string;
@@ -411,8 +412,20 @@ export default function Home() {
     };
 
     setMessages(prev => [...prev, userMessage]);
+    const currentMessage = message.trim();
     setMessage("");
     setIsLoading(true);
+
+    // Create assistant message placeholder for streaming
+    const assistantMessageId = Date.now().toString() + '_assistant';
+    const assistantMessage: Message = {
+      id: assistantMessageId,
+      role: 'assistant',
+      content: '',
+      timestamp: new Date()
+    };
+
+    setMessages(prev => [...prev, assistantMessage]);
 
     try {
       const response = await fetch('/api/chat', {
@@ -421,40 +434,91 @@ export default function Home() {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          message: message.trim(),
+          message: currentMessage,
           files: uploadedFiles.length > 0 ? uploadedFiles : undefined,
           apiKey: apiKey.trim(),
-          model: selectedModel
+          model: selectedModel,
+          stream: true
         }),
       });
 
-      const data = await response.json();
-
       if (!response.ok) {
-        throw new Error(data.error || 'Failed to send message');
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to send message');
       }
 
-      if (data.success) {
-        const assistantMessage: Message = {
-          id: Date.now().toString() + '_assistant',
-          role: 'assistant',
-          content: data.message,
-          timestamp: new Date()
-        };
+      // Handle streaming response
+      if (response.body) {
+        const reader = response.body.getReader();
+        const decoder = new TextDecoder();
+        let accumulatedContent = '';
 
-        setMessages(prev => [...prev, assistantMessage]);
+        try {
+          while (true) {
+            const { done, value } = await reader.read();
+            
+            if (done) break;
+
+            const chunk = decoder.decode(value, { stream: true });
+            const lines = chunk.split('\n');
+
+            for (const line of lines) {
+              if (line.startsWith('data: ')) {
+                const jsonStr = line.slice(6).trim();
+                if (jsonStr === '') continue;
+
+                try {
+                  const data = JSON.parse(jsonStr);
+                  
+                  if (data.type === 'content') {
+                    accumulatedContent += data.content;
+                    
+                    // Update the assistant message with streaming content
+                    setMessages(prev => prev.map(msg => 
+                      msg.id === assistantMessageId 
+                        ? { ...msg, content: accumulatedContent }
+                        : msg
+                    ));
+                  } else if (data.type === 'done') {
+                    // Streaming finished
+                    break;
+                  } else if (data.type === 'error') {
+                    throw new Error(data.error || 'Streaming error');
+                  }
+                } catch (parseError) {
+                  console.error('Error parsing streaming data:', parseError);
+                }
+              }
+            }
+          }
+        } catch (streamError) {
+          console.error('Streaming error:', streamError);
+          throw streamError;
+        } finally {
+          reader.releaseLock();
+        }
+
+        // If no content was streamed, show an error
+        if (!accumulatedContent) {
+          throw new Error('No response received from the server');
+        }
       } else {
-        throw new Error(data.error || 'Failed to get response');
+        throw new Error('No response body received');
       }
     } catch (error: any) {
       console.error('Chat error:', error);
-      const errorMessage: Message = {
-        id: Date.now().toString() + '_error',
-        role: 'assistant',
-        content: `Error: ${error.message || 'Something went wrong. Please try again.'}`,
-        timestamp: new Date()
-      };
-      setMessages(prev => [...prev, errorMessage]);
+      
+      // Remove the assistant message placeholder and add error message
+      setMessages(prev => {
+        const filtered = prev.filter(msg => msg.id !== assistantMessageId);
+        const errorMessage: Message = {
+          id: Date.now().toString() + '_error',
+          role: 'assistant',
+          content: `Error: ${error.message || 'Something went wrong. Please try again.'}`,
+          timestamp: new Date()
+        };
+        return [...filtered, errorMessage];
+      });
     } finally {
       setIsLoading(false);
       setUploadedFiles([]);
@@ -469,7 +533,7 @@ export default function Home() {
   };
 
   return (
-    <div className="h-screen bg-gradient-to-br from-slate-900 via-gray-900 to-slate-800 flex overflow-hidden">
+    <div className="h-screen bg-gradient-to-br from-slate-900 via-gray-900 to-slate-800 flex overflow-hidden hide-scrollbar">
       {/* Sidebar */}
       <ChatSidebar 
         chats={chats}
@@ -487,7 +551,7 @@ export default function Home() {
         <main className="flex-1 flex flex-col px-6 py-4 max-w-4xl mx-auto w-full min-h-0">
           {/* Messages Area */}
           {messages.length > 0 ? (
-            <div className="flex-1 overflow-y-auto mb-6 space-y-4">
+            <div className="flex-1 overflow-y-auto mb-6 space-y-4 hide-scrollbar">
               {messages.map((msg) => (
                 <div key={msg.id} className="flex justify-start">
                   <div className="flex gap-3 max-w-[80%]">
@@ -499,9 +563,13 @@ export default function Home() {
                       )}
                     </div>
                     <div className="rounded-2xl px-4 py-3 text-slate-100">
-                      <div className="text-sm leading-relaxed whitespace-pre-wrap">
-                        {msg.content}
-                      </div>
+                      {msg.role === 'assistant' ? (
+                        <MarkdownRenderer content={msg.content} />
+                      ) : (
+                        <div className="text-sm leading-relaxed whitespace-pre-wrap">
+                          {msg.content}
+                        </div>
+                      )}
                       {msg.files && msg.files.length > 0 && (
                         <div className="mt-2 flex flex-wrap gap-2">
                           {msg.files.map((file) => (
