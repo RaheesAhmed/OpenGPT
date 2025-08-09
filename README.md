@@ -50,7 +50,7 @@
 1. **Clone the repository**
 
 ```bash
-git clone https://github.com/yourusername/opengpt.git
+git clone https://github.com/raheesahmed/opengpt.git
 cd opengpt
 ```
 
