@@ -2,12 +2,18 @@
 
 **The Open Source ChatGPT Alternative - Bring Your Own API Key**
 
-[![Next.js](https://img.shields.io/badge/Next.js-14+-black?style=for-the-badge&logo=next.js)](https://nextjs.org/)
+[![Next.js](https://img.shields.io/badge/Next.js-15+-black?style=for-the-badge&logo=next.js)](https://nextjs.org/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5+-blue?style=for-the-badge&logo=typescript)](https://www.typescriptlang.org/)
 [![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-3+-38B2AC?style=for-the-badge&logo=tailwind-css)](https://tailwindcss.com/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=for-the-badge)](https://opensource.org/licenses/MIT)
 
 > 🎯 **Mission**: Make AI accessible to everyone by providing a free, open-source ChatGPT interface where users can use their own OpenAI API keys.
+
+## 📸 Preview
+
+![OpenGPT Screenshot](public/OpenGPT-screenshot.png)
+
+_OpenGPT's clean and intuitive interface - bringing the power of ChatGPT with your own API key_
 
 ## ✨ Features
 
@@ -50,8 +56,8 @@
 1. **Clone the repository**
 
 ```bash
-git clone https://github.com/raheesahmed/opengpt.git
-cd opengpt
+git clone https://github.com/raheesahmed/OpenGPT.git
+cd OpenGPT
 ```
 
 2. **Install dependencies**
@@ -207,7 +213,7 @@ const DEFAULT_CONFIG = {
 
 ### Vercel (Recommended)
 
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/yourusername/opengpt)
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/yourusername/OpenGPT)
 
 1. **Fork this repository**
 2. **Connect to Vercel**
@@ -218,10 +224,10 @@ const DEFAULT_CONFIG = {
 
 ```bash
 # Build the image
-docker build -t opengpt .
+docker build -t OpenGPT .
 
 # Run the container
-docker run -p 3000:3000 -e NEXTAUTH_SECRET=your-secret opengpt
+docker run -p 3000:3000 -e NEXTAUTH_SECRET=your-secret OpenGPT
 ```
 
 ### Self-Hosting
@@ -311,10 +317,10 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ### Need Help?
 
-- 📖 **Documentation**: Check our [docs](https://docs.opengpt.com)
-- 💬 **Discussions**: Join our [GitHub Discussions](https://github.com/yourusername/opengpt/discussions)
-- 🐛 **Issues**: Report bugs in [Issues](https://github.com/yourusername/opengpt/issues)
-- 📧 **Email**: Contact us at support@opengpt.com
+- 📖 **Documentation**: Comming Soon
+- 💬 **Discussions**: Join our [GitHub Discussions](https://github.com/raheesahmed/OpenGPT/discussions)
+- 🐛 **Issues**: Report bugs in [Issues](https://github.com/raheesahmed/OpenGPT/issues)
+- 📧 **Email**: Contact us at support@OpenGPT.com
 
 ### FAQ
 
@@ -334,9 +340,7 @@ A: Absolutely! Check our deployment guide above.
 
 <div align="center">
 
-**Made with ❤️ by the OpenGPT Community**
-
-[Website](https://opengpt.com) • [Documentation](https://docs.opengpt.com) • [Discord](https://discord.gg/opengpt) • [Twitter](https://twitter.com/opengpt)
+**Made with ❤️ by Rahees Ahmed**
 
 **⭐ Star us on GitHub if you find this project useful!**
 
@@ -346,11 +350,11 @@ A: Absolutely! Check our deployment guide above.
 
 ## 📊 Stats
 
-![GitHub stars](https://img.shields.io/github/stars/yourusername/opengpt?style=social)
-![GitHub forks](https://img.shields.io/github/forks/yourusername/opengpt?style=social)
-![GitHub issues](https://img.shields.io/github/issues/yourusername/opengpt)
-![GitHub pull requests](https://img.shields.io/github/issues-pr/yourusername/opengpt)
-![GitHub last commit](https://img.shields.io/github/last-commit/yourusername/opengpt)
+![GitHub stars](https://img.shields.io/github/stars/yourusername/OpenGPT?style=social)
+![GitHub forks](https://img.shields.io/github/forks/yourusername/OpenGPT?style=social)
+![GitHub issues](https://img.shields.io/github/issues/yourusername/OpenGPT)
+![GitHub pull requests](https://img.shields.io/github/issues-pr/yourusername/OpenGPT)
+![GitHub last commit](https://img.shields.io/github/last-commit/yourusername/OpenGPT)
 
 ## 🗺️ Roadmap
 
