@@ -11,7 +11,7 @@
 
 ## 📸 Preview
 
-![OpenGPT Screenshot](public/OpenGPT-screenshot.png)
+![OpenGPT Screenshot](public/opengpt-screenshot.png)
 
 _OpenGPT's clean and intuitive interface - bringing the power of ChatGPT with your own API key_
 
