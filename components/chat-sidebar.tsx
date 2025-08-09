@@ -13,56 +13,25 @@ interface Chat {
 }
 
 interface ChatSidebarProps {
-  initialChats?: Chat[];
+  chats: Chat[];
+  onNewChat: () => void;
+  onSelectChat: (chatId: string) => void;
+  onDeleteChat: (chatId: string) => void;
+  onRenameChat: (chatId: string, newTitle: string) => void;
   className?: string;
   onSettingsClick?: () => void;
 }
 
-export function ChatSidebar({ initialChats = [], className = "", onSettingsClick }: ChatSidebarProps) {
+export function ChatSidebar({ 
+  chats, 
+  onNewChat, 
+  onSelectChat, 
+  onDeleteChat, 
+  onRenameChat, 
+  className = "", 
+  onSettingsClick 
+}: ChatSidebarProps) {
   const [isExpanded, setIsExpanded] = useState(false);
-  const [chats, setChats] = useState<Chat[]>(initialChats);
-
-  const handleNewChat = () => {
-    const newChat: Chat = {
-      id: Date.now().toString(),
-      title: "New Chat",
-      lastMessage: "Start a conversation...",
-      timestamp: new Date(),
-      isActive: true
-    };
-
-    // Mark all other chats as inactive
-    setChats(prev => [
-      newChat,
-      ...prev.map(chat => ({ ...chat, isActive: false }))
-    ]);
-  };
-
-  const handleSelectChat = (chatId: string) => {
-    setChats(prev => prev.map(chat => ({
-      ...chat,
-      isActive: chat.id === chatId
-    })));
-  };
-
-  const handleDeleteChat = (chatId: string) => {
-    setChats(prev => {
-      const filtered = prev.filter(chat => chat.id !== chatId);
-      
-      // If we deleted the active chat and there are remaining chats, make the first one active
-      if (prev.find(chat => chat.id === chatId)?.isActive && filtered.length > 0) {
-        filtered[0].isActive = true;
-      }
-      
-      return filtered;
-    });
-  };
-
-  const handleRenameChat = (chatId: string, newTitle: string) => {
-    setChats(prev => prev.map(chat => 
-      chat.id === chatId ? { ...chat, title: newTitle } : chat
-    ));
-  };
 
   const handleToggleSidebar = () => {
     setIsExpanded(!isExpanded);
@@ -78,10 +47,10 @@ export function ChatSidebar({ initialChats = [], className = "", onSettingsClick
           isOpen={isExpanded}
           onToggle={handleToggleSidebar}
           chats={sortedChats}
-          onNewChat={handleNewChat}
-          onSelectChat={handleSelectChat}
-          onDeleteChat={handleDeleteChat}
-          onRenameChat={handleRenameChat}
+          onNewChat={onNewChat}
+          onSelectChat={onSelectChat}
+          onDeleteChat={onDeleteChat}
+          onRenameChat={onRenameChat}
           onSettingsClick={onSettingsClick}
         />
       </div>
@@ -92,8 +61,8 @@ export function ChatSidebar({ initialChats = [], className = "", onSettingsClick
     <div className={className}>
       <MiniSidebar
         chats={sortedChats}
-        onNewChat={handleNewChat}
-        onSelectChat={handleSelectChat}
+        onNewChat={onNewChat}
+        onSelectChat={onSelectChat}
         onToggle={handleToggleSidebar}
         onSettingsClick={onSettingsClick}
       />

@@ -61,14 +61,97 @@ export default function Home() {
   }>>([]);
   const [showSettings, setShowSettings] = useState(false);
   const [tempApiKey, setTempApiKey] = useState("");
+  const [currentChatId, setCurrentChatId] = useState<string | null>(null);
+  const [chats, setChats] = useState<Chat[]>([]);
 
-  // Load API key from localStorage on component mount
+  // Load data from localStorage on component mount
   useEffect(() => {
     const savedApiKey = localStorage.getItem('openai_api_key');
+    const savedChats = localStorage.getItem('openai_chats');
+    const savedCurrentChatId = localStorage.getItem('openai_current_chat_id');
+    
     if (savedApiKey) {
       setApiKey(savedApiKey);
     }
+    
+    if (savedChats) {
+      try {
+        const parsedChats = JSON.parse(savedChats);
+        // Convert timestamp strings back to Date objects
+        const chatsWithDates = parsedChats.map((chat: any) => ({
+          ...chat,
+          timestamp: new Date(chat.timestamp)
+        }));
+        setChats(chatsWithDates);
+      } catch (error) {
+        console.error('Error parsing saved chats:', error);
+      }
+    }
+    
+    if (savedCurrentChatId) {
+      setCurrentChatId(savedCurrentChatId);
+      // Load messages for the current chat
+      const savedMessages = localStorage.getItem(`openai_chat_messages_${savedCurrentChatId}`);
+      if (savedMessages) {
+        try {
+          const parsedMessages = JSON.parse(savedMessages);
+          // Convert timestamp strings back to Date objects
+          const messagesWithDates = parsedMessages.map((msg: any) => ({
+            ...msg,
+            timestamp: new Date(msg.timestamp)
+          }));
+          setMessages(messagesWithDates);
+        } catch (error) {
+          console.error('Error parsing saved messages:', error);
+        }
+      }
+    }
   }, []);
+
+  // Save chats to localStorage whenever chats change
+  useEffect(() => {
+    if (chats.length > 0) {
+      localStorage.setItem('openai_chats', JSON.stringify(chats));
+    }
+  }, [chats]);
+
+  // Save current chat messages whenever messages change
+  useEffect(() => {
+    if (currentChatId && messages.length > 0) {
+      localStorage.setItem(`openai_chat_messages_${currentChatId}`, JSON.stringify(messages));
+      
+      // Update the chat's last message and timestamp
+      setChats(prev => prev.map(chat => {
+        if (chat.id === currentChatId) {
+          const lastMessage = messages[messages.length - 1];
+          return {
+            ...chat,
+            lastMessage: lastMessage.content.substring(0, 50) + (lastMessage.content.length > 50 ? '...' : ''),
+            timestamp: new Date(),
+            title: chat.title === 'New Chat' ? generateChatTitle(messages) : chat.title
+          };
+        }
+        return chat;
+      }));
+    }
+  }, [messages, currentChatId]);
+
+  // Save current chat ID whenever it changes
+  useEffect(() => {
+    if (currentChatId) {
+      localStorage.setItem('openai_current_chat_id', currentChatId);
+    }
+  }, [currentChatId]);
+
+  // Generate a chat title based on the first user message
+  const generateChatTitle = (msgs: Message[]): string => {
+    const firstUserMessage = msgs.find(msg => msg.role === 'user');
+    if (firstUserMessage) {
+      const title = firstUserMessage.content.substring(0, 30);
+      return title.length < firstUserMessage.content.length ? title + '...' : title;
+    }
+    return 'New Chat';
+  };
 
   // Save API key to localStorage
   const saveApiKey = (key: string) => {
@@ -178,12 +261,145 @@ export default function Home() {
     setUploadedFiles(prev => prev.filter(file => file.id !== fileId));
   };
 
+  // Handle new chat creation
+  const handleNewChat = () => {
+    const newChatId = Date.now().toString();
+    const newChat: Chat = {
+      id: newChatId,
+      title: "New Chat",
+      lastMessage: "Start a conversation...",
+      timestamp: new Date(),
+      isActive: true
+    };
+
+    // Save current chat messages if there are any
+    if (currentChatId && messages.length > 0) {
+      localStorage.setItem(`openai_chat_messages_${currentChatId}`, JSON.stringify(messages));
+    }
+
+    // Clear current messages and set new chat
+    setMessages([]);
+    setCurrentChatId(newChatId);
+    
+    // Mark all other chats as inactive and add the new one
+    setChats(prev => [
+      newChat,
+      ...prev.map(chat => ({ ...chat, isActive: false }))
+    ]);
+  };
+
+  // Handle chat selection
+  const handleSelectChat = (chatId: string) => {
+    if (chatId === currentChatId) return;
+
+    // Save current chat messages
+    if (currentChatId && messages.length > 0) {
+      localStorage.setItem(`openai_chat_messages_${currentChatId}`, JSON.stringify(messages));
+    }
+
+    // Load selected chat messages
+    const savedMessages = localStorage.getItem(`openai_chat_messages_${chatId}`);
+    if (savedMessages) {
+      try {
+        const parsedMessages = JSON.parse(savedMessages);
+        const messagesWithDates = parsedMessages.map((msg: any) => ({
+          ...msg,
+          timestamp: new Date(msg.timestamp)
+        }));
+        setMessages(messagesWithDates);
+      } catch (error) {
+        console.error('Error loading chat messages:', error);
+        setMessages([]);
+      }
+    } else {
+      setMessages([]);
+    }
+
+    setCurrentChatId(chatId);
+    
+    // Update active chat
+    setChats(prev => prev.map(chat => ({
+      ...chat,
+      isActive: chat.id === chatId
+    })));
+  };
+
+  // Handle chat deletion
+  const handleDeleteChat = (chatId: string) => {
+    // Remove chat from localStorage
+    localStorage.removeItem(`openai_chat_messages_${chatId}`);
+    
+    const wasActive = chats.find(chat => chat.id === chatId)?.isActive;
+    
+    setChats(prev => {
+      const filtered = prev.filter(chat => chat.id !== chatId);
+      
+      // If we deleted the active chat
+      if (wasActive) {
+        if (filtered.length > 0) {
+          // Make the first remaining chat active and load its messages
+          filtered[0].isActive = true;
+          setCurrentChatId(filtered[0].id);
+          
+          const savedMessages = localStorage.getItem(`openai_chat_messages_${filtered[0].id}`);
+          if (savedMessages) {
+            try {
+              const parsedMessages = JSON.parse(savedMessages);
+              const messagesWithDates = parsedMessages.map((msg: any) => ({
+                ...msg,
+                timestamp: new Date(msg.timestamp)
+              }));
+              setMessages(messagesWithDates);
+            } catch (error) {
+              console.error('Error loading chat messages:', error);
+              setMessages([]);
+            }
+          } else {
+            setMessages([]);
+          }
+        } else {
+          // No chats left
+          setCurrentChatId(null);
+          setMessages([]);
+          localStorage.removeItem('openai_current_chat_id');
+        }
+      }
+      
+      return filtered;
+    });
+  };
+
+  // Handle chat rename
+  const handleRenameChat = (chatId: string, newTitle: string) => {
+    setChats(prev => prev.map(chat => 
+      chat.id === chatId ? { ...chat, title: newTitle } : chat
+    ));
+  };
+
   const handleSendMessage = async () => {
     if ((!message.trim() && uploadedFiles.length === 0) || isLoading) return;
 
     if (!apiKey.trim()) {
       alert("Please add your OpenAI API key first");
       return;
+    }
+
+    // If no current chat, create one
+    if (!currentChatId) {
+      const newChatId = Date.now().toString();
+      const newChat: Chat = {
+        id: newChatId,
+        title: "New Chat",
+        lastMessage: "Start a conversation...",
+        timestamp: new Date(),
+        isActive: true
+      };
+
+      setCurrentChatId(newChatId);
+      setChats(prev => [
+        newChat,
+        ...prev.map(chat => ({ ...chat, isActive: false }))
+      ]);
     }
 
     const userMessage: Message = {
@@ -252,34 +468,15 @@ export default function Home() {
     }
   };
 
-  // Sample chat data for demonstration
-  const sampleChats: Chat[] = [
-    {
-      id: "1",
-      title: "Getting Started with React",
-      lastMessage: "How do I create a new React component?",
-      timestamp: new Date(Date.now() - 1000 * 60 * 30), // 30 minutes ago
-      isActive: true
-    },
-    {
-      id: "2", 
-      title: "Python Data Analysis",
-      lastMessage: "Can you help me analyze this CSV file?",
-      timestamp: new Date(Date.now() - 1000 * 60 * 60 * 2), // 2 hours ago
-    },
-    {
-      id: "3",
-      title: "UI/UX Design Tips",
-      lastMessage: "What are the best practices for modern web design?",
-      timestamp: new Date(Date.now() - 1000 * 60 * 60 * 24), // 1 day ago
-    }
-  ];
-
   return (
     <div className="h-screen bg-gradient-to-br from-slate-900 via-gray-900 to-slate-800 flex overflow-hidden">
       {/* Sidebar */}
       <ChatSidebar 
-        initialChats={sampleChats}
+        chats={chats}
+        onNewChat={handleNewChat}
+        onSelectChat={handleSelectChat}
+        onDeleteChat={handleDeleteChat}
+        onRenameChat={handleRenameChat}
         className="h-full flex-shrink-0"
         onSettingsClick={handleOpenSettings}
       />
