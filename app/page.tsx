@@ -33,6 +33,7 @@ import {
 } from "lucide-react";
 import { MarkdownRenderer } from "@/components/markdown-renderer";
 import { SystemPromptModal } from "@/components/system-prompt-modal";
+import { ArtifactsPanel } from "@/components/artifacts-panel";
 import { chatMemory } from "@/lib/chat-memory";
 import { Brain, History } from "lucide-react";
 
@@ -69,6 +70,14 @@ export default function Home() {
   const [currentChatId, setCurrentChatId] = useState<string | null>(null);
   const [chats, setChats] = useState<Chat[]>([]);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const [currentArtifact, setCurrentArtifact] = useState<{
+    id: string;
+    title: string;
+    type: 'code' | 'markdown' | 'html' | 'text' | 'json';
+    language?: string;
+    content: string;
+    filename?: string;
+  } | null>(null);
 
   // Load data from localStorage on component mount
   useEffect(() => {
@@ -602,7 +611,10 @@ export default function Home() {
                     </div>
                     <div className="rounded-2xl px-4 py-3 text-slate-100">
                       {msg.role === 'assistant' ? (
-                        <MarkdownRenderer content={msg.content} />
+                        <MarkdownRenderer 
+                          content={msg.content}
+                          onOpenArtifact={setCurrentArtifact}
+                        />
                       ) : (
                         <div className="text-sm leading-relaxed whitespace-pre-wrap">
                           {msg.content}
@@ -964,6 +976,14 @@ export default function Home() {
         isOpen={showSystemPrompt}
         onClose={() => setShowSystemPrompt(false)}
       />
+
+      {/* Artifacts Panel */}
+      {currentArtifact && (
+        <ArtifactsPanel
+          artifact={currentArtifact}
+          onClose={() => setCurrentArtifact(null)}
+        />
+      )}
     </div>
   );
 }

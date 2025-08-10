@@ -5,7 +5,7 @@ import remarkGfm from 'remark-gfm';
 import rehypeHighlight from 'rehype-highlight';
 import rehypeRaw from 'rehype-raw';
 import { Components } from 'react-markdown';
-import { Copy, Check } from 'lucide-react';
+import { Copy, Check, ExternalLink } from 'lucide-react';
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 
@@ -15,9 +15,17 @@ import 'highlight.js/styles/github-dark.css';
 interface MarkdownRendererProps {
   content: string;
   className?: string;
+  onOpenArtifact?: (artifact: {
+    id: string;
+    title: string;
+    type: 'code' | 'markdown' | 'html' | 'text' | 'json';
+    language?: string;
+    content: string;
+    filename?: string;
+  }) => void;
 }
 
-export function MarkdownRenderer({ content, className = "" }: MarkdownRendererProps) {
+export function MarkdownRenderer({ content, className = "", onOpenArtifact }: MarkdownRendererProps) {
   const [copiedCode, setCopiedCode] = useState<string | null>(null);
   const [showToast, setShowToast] = useState(false);
 
@@ -46,28 +54,77 @@ export function MarkdownRenderer({ content, className = "" }: MarkdownRendererPr
       const { node, inline, className, children, ...rest } = props;
       const match = /language-(\w+)/.exec(className || '');
       const language = match ? match[1] : '';
-      const codeContent = String(children).replace(/\n$/, '');
+      // Properly extract text content from React children
+      const extractTextContent = (element: any): string => {
+        if (typeof element === 'string') {
+          return element;
+        }
+        if (typeof element === 'number') {
+          return element.toString();
+        }
+        if (Array.isArray(element)) {
+          return element.map(extractTextContent).join('');
+        }
+        if (element && typeof element === 'object' && element.props && element.props.children) {
+          return extractTextContent(element.props.children);
+        }
+        return '';
+      };
+      
+      const codeContent = extractTextContent(children).replace(/\n$/, '');
       const codeId = Math.random().toString(36).substr(2, 9);
       
       if (!inline) {
+        const shouldShowArtifact = codeContent.length > 100 && onOpenArtifact; // Show artifact for longer code
+        
+        const handleOpenArtifact = () => {
+          if (onOpenArtifact) {
+            const artifact = {
+              id: `artifact-${codeId}`,
+              title: `${language || 'Code'} ${language === 'html' ? 'Page' : language === 'json' ? 'Data' : 'Snippet'}`,
+              type: (language === 'html' ? 'html' : 
+                     language === 'json' ? 'json' :
+                     language === 'markdown' || language === 'md' ? 'markdown' :
+                     'code') as 'code' | 'markdown' | 'html' | 'text' | 'json',
+              language: language,
+              content: codeContent,
+              filename: `code.${language || 'txt'}`
+            };
+            onOpenArtifact(artifact);
+          }
+        };
+        
         return (
           <div className="relative group my-4 not-prose">
             <div className="flex items-center justify-between bg-[#2f2f2f] px-4 py-2 rounded-t-lg">
               <span className="text-xs text-gray-300 font-medium">
                 {language || 'plaintext'}
               </span>
-              <Button
-                variant="ghost"
-                size="sm"
-                className="h-6 w-6 p-0 text-gray-400 hover:text-white hover:bg-gray-600/50 transition-all duration-200"
-                onClick={() => copyToClipboard(codeContent, codeId)}
-              >
-                {copiedCode === codeId ? (
-                  <Check className="w-3.5 h-3.5 text-green-400" />
-                ) : (
-                  <Copy className="w-3.5 h-3.5" />
+              <div className="flex items-center gap-1">
+                {shouldShowArtifact && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="h-6 px-2 text-gray-400 hover:text-white hover:bg-gray-600/50 transition-all duration-200 text-xs"
+                    onClick={handleOpenArtifact}
+                  >
+                    <ExternalLink className="w-3 h-3 mr-1" />
+                    Open
+                  </Button>
                 )}
-              </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="h-6 w-6 p-0 text-gray-400 hover:text-white hover:bg-gray-600/50 transition-all duration-200"
+                  onClick={() => copyToClipboard(codeContent, codeId)}
+                >
+                  {copiedCode === codeId ? (
+                    <Check className="w-3.5 h-3.5 text-green-400" />
+                  ) : (
+                    <Copy className="w-3.5 h-3.5" />
+                  )}
+                </Button>
+              </div>
             </div>
             <pre className="bg-black text-white p-4 rounded-b-lg overflow-x-auto text-sm leading-6 font-mono">
               <code className={className} {...rest}>

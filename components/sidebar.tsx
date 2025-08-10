@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
+import { DeleteChatModal } from "@/components/delete-chat-modal";
 import { 
   MessageSquare, 
   Plus, 
@@ -49,6 +50,8 @@ export function Sidebar({
   const [searchQuery, setSearchQuery] = useState("");
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editTitle, setEditTitle] = useState("");
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [chatToDelete, setChatToDelete] = useState<Chat | null>(null);
 
   const filteredChats = chats.filter(chat => 
     chat.title.toLowerCase().includes(searchQuery.toLowerCase())
@@ -70,6 +73,23 @@ export function Sidebar({
   const handleCancelEdit = () => {
     setEditingId(null);
     setEditTitle("");
+  };
+
+  const handleDeleteClick = (chat: Chat) => {
+    setChatToDelete(chat);
+    setShowDeleteModal(true);
+  };
+
+  const handleDeleteConfirm = () => {
+    if (chatToDelete) {
+      onDeleteChat(chatToDelete.id);
+      setChatToDelete(null);
+    }
+  };
+
+  const handleDeleteCancel = () => {
+    setShowDeleteModal(false);
+    setChatToDelete(null);
   };
 
   const formatTimestamp = (timestamp: Date) => {
@@ -213,9 +233,7 @@ export function Sidebar({
                         size="icon"
                         onClick={(e) => {
                           e.stopPropagation();
-                          if (confirm("Delete this chat?")) {
-                            onDeleteChat(chat.id);
-                          }
+                          handleDeleteClick(chat);
                         }}
                         className="h-6 w-6 text-slate-500 hover:text-red-400 hover:bg-slate-700 transition-all duration-200"
                       >
@@ -249,6 +267,16 @@ export function Sidebar({
           </Button>
         </div>
       </div>
+
+      {/* Delete Confirmation Modal */}
+      {showDeleteModal && chatToDelete && (
+        <DeleteChatModal
+          isOpen={showDeleteModal}
+          onClose={handleDeleteCancel}
+          onConfirm={handleDeleteConfirm}
+          chatTitle={chatToDelete.title}
+        />
+      )}
     </div>
   );
 }

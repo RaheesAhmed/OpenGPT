@@ -1,7 +1,9 @@
 "use client";
 
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { DeleteChatModal } from "@/components/delete-chat-modal";
 import { 
   MessageSquare, 
   Plus, 
@@ -49,8 +51,28 @@ export function MiniSidebar({
   onSettingsClick,
   className = "" 
 }: MiniSidebarProps) {
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [chatToDelete, setChatToDelete] = useState<Chat | null>(null);
+
   const recentChats = chats.slice(0, 8); // Show only 8 most recent chats
   const activeChat = chats.find(chat => chat.isActive);
+
+  const handleDeleteClick = (chat: Chat) => {
+    setChatToDelete(chat);
+    setShowDeleteModal(true);
+  };
+
+  const handleDeleteConfirm = () => {
+    if (chatToDelete) {
+      onDeleteChat(chatToDelete.id);
+      setChatToDelete(null);
+    }
+  };
+
+  const handleDeleteCancel = () => {
+    setShowDeleteModal(false);
+    setChatToDelete(null);
+  };
 
   const formatTimestamp = (timestamp: Date) => {
     const now = new Date();
@@ -182,9 +204,7 @@ export function MiniSidebar({
                           size="sm"
                           onClick={(e) => {
                             e.stopPropagation();
-                            if (confirm("Delete this chat?")) {
-                              onDeleteChat(chat.id);
-                            }
+                            handleDeleteClick(chat);
                           }}
                           className="h-6 w-6 p-0 text-slate-400 hover:text-red-400 hover:bg-slate-700"
                         >
@@ -234,6 +254,16 @@ export function MiniSidebar({
             </Tooltip>
           </div>
         </div>
+
+        {/* Delete Confirmation Modal */}
+        {showDeleteModal && chatToDelete && (
+          <DeleteChatModal
+            isOpen={showDeleteModal}
+            onClose={handleDeleteCancel}
+            onConfirm={handleDeleteConfirm}
+            chatTitle={chatToDelete.title}
+          />
+        )}
       </div>
     </TooltipProvider>
   );
