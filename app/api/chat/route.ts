@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import OpenAI from "openai";
+import { Agent, run, setDefaultOpenAIKey,webSearchTool } from '@openai/agents';
 
 // Helper function to create a streaming response
 function createStreamingResponse(stream: ReadableStream) {
@@ -12,9 +12,15 @@ function createStreamingResponse(stream: ReadableStream) {
   });
 }
 
+interface UserContext {
+  apiKey: string;
+  systemPrompt?: string;
+  memoryContext?: string;
+}
+
 export async function POST(request: NextRequest) {
   try {
-    const { message, files, memoryContext, apiKey, model = "gpt-4o-mini", stream = true } = await request.json();
+    const { message, files, memoryContext, apiKey, model = "gpt-4o-mini", stream = true, systemPrompt } = await request.json();
 
     // Validate required fields
     if (!message && (!files || files.length === 0)) {
@@ -31,66 +37,50 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Initialize OpenAI with user's API key
-    const openai = new OpenAI({ apiKey });
+    // Set OpenAI API key for the SDK
+    setDefaultOpenAIKey(apiKey);
 
-    // Build messages array for chat completions API (more standard approach)
-    const messages: any[] = [];
-
-    // Add memory context as system message if available
-    if (memoryContext && memoryContext.trim()) {
-      messages.push({
-        role: "system",
-        content: `${memoryContext.trim()}`
-      });
+    // Build instructions dynamically
+    let instructions = systemPrompt;
+    
+    if (memoryContext) {
+      instructions += `\n\nConversation context: ${memoryContext}`;
     }
 
-    // Build content array for the current message
-    const content: any[] = [];
-
-    // Add text message if provided
-    if (message && message.trim()) {
-      content.push({
-        type: "text",
-        text: message.trim()
-      });
-    }
-
-    // Add files if provided
+    // Handle files in the message
+    let messageContent = message;
     if (files && files.length > 0) {
-      files.forEach((file: any) => {
+      const fileContents = files.map((file: any) => {
         if (file.type?.startsWith('image/')) {
-          // Handle image files
-          content.push({
-            type: "image_url",
-            image_url: {
-              url: file.content, // Base64 data URL
-              detail: "auto"
-            }
-          });
+          return `[Image: ${file.name}]`;
         } else {
-          // Handle text files by adding their content as text
-          content.push({
-            type: "text",
-            text: `File: ${file.name}\n\n${file.content}`
-          });
+          return `File: ${file.name}\n\n${file.content}`;
         }
-      });
+      }).join('\n\n');
+      
+      messageContent = fileContents + '\n\n' + message;
     }
 
-    messages.push({
-      role: "user",
-      content: content.length === 1 && content[0].type === "text" ? content[0].text : content
+    // Create agent with dynamic instructions
+    const agent = new Agent<UserContext>({
+      name: 'OpenGPT',
+      instructions,
+      model: model,
+      tools: [webSearchTool()]
     });
 
+    // Prepare context
+    const context: UserContext = {
+      apiKey,
+      systemPrompt,
+      memoryContext,
+    };
+
     if (stream) {
-      // Create streaming response
-      const streamResponse = await openai.chat.completions.create({
-        model,
-        messages,
-        stream: true,
-        temperature: 0.7,
-        max_tokens: 4000,
+      // Stream the agent response
+      const streamResult = await run(agent, messageContent, { 
+        context,
+        stream: true 
       });
 
       // Create a ReadableStream to handle the streaming response
@@ -99,28 +89,29 @@ export async function POST(request: NextRequest) {
           const encoder = new TextEncoder();
           
           try {
-            for await (const chunk of streamResponse) {
-              const delta = chunk.choices[0]?.delta?.content || '';
-              
-              if (delta) {
-                // Send the text chunk as server-sent event
-                const data = JSON.stringify({
-                  type: 'content',
-                  content: delta
-                });
-                controller.enqueue(encoder.encode(`data: ${data}\n\n`));
-              }
-              
-              // Check if streaming is finished
-              if (chunk.choices[0]?.finish_reason) {
-                const finishData = JSON.stringify({
-                  type: 'done',
-                  finish_reason: chunk.choices[0].finish_reason
-                });
-                controller.enqueue(encoder.encode(`data: ${finishData}\n\n`));
-                break;
-              }
+            // Stream text output
+            const textStream = streamResult.toTextStream({ 
+              compatibleWithNodeStreams: false 
+            });
+            
+            for await (const chunk of textStream) {
+              const data = JSON.stringify({
+                type: 'content',
+                content: chunk
+              });
+              controller.enqueue(encoder.encode(`data: ${data}\n\n`));
             }
+            
+            // Wait for completion
+            await streamResult.completed;
+            
+            // Send completion signal
+            const finishData = JSON.stringify({
+              type: 'done',
+              finish_reason: 'stop'
+            });
+            controller.enqueue(encoder.encode(`data: ${finishData}\n\n`));
+            
           } catch (error) {
             console.error('Streaming error:', error);
             const errorData = JSON.stringify({
@@ -135,28 +126,21 @@ export async function POST(request: NextRequest) {
       });
 
       return createStreamingResponse(readableStream);
+      
     } else {
-      // Non-streaming response (fallback)
-      const response = await openai.chat.completions.create({
-        model,
-        messages,
-        temperature: 0.7,
-        max_tokens: 4000,
-      });
-
-      const messageText = response.choices[0]?.message?.content || "No response received";
+      // Non-streaming response
+      const result = await run(agent, messageContent, { context });
 
       return NextResponse.json({
         success: true,
-        message: messageText,
-        usage: response.usage
+        message: result.finalOutput,
       });
     }
 
   } catch (error: any) {
-    console.error("Chat API Error:", error);
+    console.error("Agents API Error:", error);
     
-    // Handle specific OpenAI errors
+    // Handle specific errors
     if (error?.status === 401) {
       return NextResponse.json(
         { error: "Invalid API key" },

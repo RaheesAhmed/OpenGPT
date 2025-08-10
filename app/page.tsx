@@ -32,6 +32,7 @@ import {
   Save
 } from "lucide-react";
 import { MarkdownRenderer } from "@/components/markdown-renderer";
+import { SystemPromptModal } from "@/components/system-prompt-modal";
 import { chatMemory } from "@/lib/chat-memory";
 import { Brain, History } from "lucide-react";
 
@@ -63,6 +64,7 @@ export default function Home() {
     id: string;
   }>>([]);
   const [showSettings, setShowSettings] = useState(false);
+  const [showSystemPrompt, setShowSystemPrompt] = useState(false);
   const [tempApiKey, setTempApiKey] = useState("");
   const [currentChatId, setCurrentChatId] = useState<string | null>(null);
   const [chats, setChats] = useState<Chat[]>([]);
@@ -433,8 +435,9 @@ export default function Home() {
     setMessages(prev => [...prev, assistantMessage]);
 
     try {
-      // Load memory context if available
+      // Load memory context and system prompt if available
       const memoryContext = currentChatId ? chatMemory.loadContext(currentChatId) : '';
+      const systemPrompt = localStorage.getItem('openai_system_prompt') || '';
       
       const response = await fetch('/api/chat', {
         method: 'POST',
@@ -445,6 +448,7 @@ export default function Home() {
           message: currentMessage,
           files: uploadedFiles.length > 0 ? uploadedFiles : undefined,
           memoryContext: memoryContext,
+          systemPrompt: systemPrompt,
           apiKey: apiKey.trim(),
           model: selectedModel,
           stream: true
@@ -891,6 +895,22 @@ export default function Home() {
                 Get your key from <a href="https://platform.openai.com/api-keys" target="_blank" className="text-slate-400 hover:underline">OpenAI Platform</a>.
               </p>
             </div>
+
+            {/* System Prompt Section */}
+            <div className="space-y-2 pt-4 border-t border-slate-700/50">
+              <label className="text-sm font-medium text-white">System Prompt</label>
+              <p className="text-xs text-slate-500 mb-3">
+                Customize how the AI assistant behaves by setting a system prompt.
+              </p>
+              <Button
+                onClick={() => setShowSystemPrompt(true)}
+                variant="outline"
+                className="w-full border-slate-600 text-slate-300 hover:bg-slate-800 justify-start gap-2"
+              >
+                <MessageSquare className="w-4 h-4" />
+                Configure System Prompt
+              </Button>
+            </div>
           </div>
 
           <div className="flex justify-end gap-2">
@@ -904,6 +924,12 @@ export default function Home() {
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* System Prompt Modal */}
+      <SystemPromptModal
+        isOpen={showSystemPrompt}
+        onClose={() => setShowSystemPrompt(false)}
+      />
     </div>
   );
 }
