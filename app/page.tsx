@@ -711,14 +711,23 @@ export default function Home() {
                     </div>
                     
                     <div className="flex-1 min-w-0">
-                      <input
-                        type="text"
+                      <textarea
                         placeholder="How can I help you today?"
                         value={message}
                         onChange={(e) => setMessage(e.target.value)}
                         onKeyPress={handleKeyPress}
-                        className="w-full bg-transparent text-white placeholder-slate-400 text-lg border-none outline-none resize-none focus:text-white"
-                        style={{ color: 'white' }}
+                        rows={1}
+                        className="w-full bg-transparent text-white placeholder-slate-400 text-lg border-none outline-none resize-none focus:text-white min-h-[1.5rem] max-h-32 overflow-y-auto"
+                        style={{ 
+                          color: 'white',
+                          height: 'auto',
+                          minHeight: '1.5rem'
+                        }}
+                        onInput={(e) => {
+                          const target = e.target as HTMLTextAreaElement;
+                          target.style.height = 'auto';
+                          target.style.height = Math.min(target.scrollHeight, 128) + 'px';
+                        }}
                       />
                     </div>
                     
@@ -843,14 +852,23 @@ export default function Home() {
                   </div>
                   
                   <div className="flex-1 min-w-0">
-                    <input
-                      type="text"
+                    <textarea
                       placeholder="How can I help you today?"
                       value={message}
                       onChange={(e) => setMessage(e.target.value)}
                       onKeyPress={handleKeyPress}
-                      className="w-full bg-transparent text-white placeholder-slate-400 text-lg border-none outline-none resize-none focus:text-white"
-                      style={{ color: 'white' }}
+                      rows={1}
+                      className="w-full bg-transparent text-white placeholder-slate-400 text-lg border-none outline-none resize-none focus:text-white min-h-[1.5rem] max-h-32 overflow-y-auto"
+                      style={{ 
+                        color: 'white',
+                        height: 'auto',
+                        minHeight: '1.5rem'
+                      }}
+                      onInput={(e) => {
+                        const target = e.target as HTMLTextAreaElement;
+                        target.style.height = 'auto';
+                        target.style.height = Math.min(target.scrollHeight, 128) + 'px';
+                      }}
                     />
                   </div>
                   
