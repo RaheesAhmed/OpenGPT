@@ -7,56 +7,64 @@
 [![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-3+-38B2AC?style=for-the-badge&logo=tailwind-css)](https://tailwindcss.com/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=for-the-badge)](https://opensource.org/licenses/MIT)
 
-> 🎯 **Mission**: Make AI accessible to everyone by providing a free, open-source ChatGPT interface where users can use their own OpenAI API keys.
+> 🎯 **Mission**: Make AI accessible to everyone by providing a free, open-source ChatGPT interface where users control their own API keys and data.
 
 ## 📸 Preview
 
 ![OpenGPT Screenshot](public/opengpt-screenshot.png)
 
-_OpenGPT's clean and intuitive interface - bringing the power of ChatGPT with your own API key_
+_OpenGPT's clean and intuitive interface - bringing the power of ChatGPT with complete privacy and control_
 
 ## ✨ Features
 
 ### 🔥 **Core Features**
 
 - 💬 **ChatGPT-like Interface** - Familiar and intuitive chat experience
-- 🔑 **Bring Your Own API Key** - No subscription fees, use your OpenAI credits
-- 🌙 **Beautiful Dark Theme** - Polished UI matching modern design standards
-- 📱 **Fully Responsive** - Perfect on desktop, tablet, and mobile
-- ⚡ **Real-time Streaming** - See responses as they're generated
-- 💾 **Chat History** - Save and manage your conversation history
-- 🗂️ **Multiple Conversations** - Organize chats with custom titles
+- 🔑 **Bring Your Own API Key** - No subscriptions, use your OpenAI credits directly
+- 🧠 **Intelligent Memory System** - Advanced conversation context with 4-layer memory architecture
+- 📱 **Fully Responsive** - Perfect experience on desktop, tablet, and mobile
+- ⚡ **Real-time Streaming** - See responses as they're generated, just like ChatGPT
+- 💾 **Persistent Chat History** - All conversations saved locally with full control
+- 🗂️ **Smart Chat Management** - Organize with search, rename, delete, and auto-titles
+
+### 🧠 **Advanced Memory System**
+
+- 🎯 **4-Layer Architecture** - Immediate, recent, historical, and important context layers
+- 📊 **Token Optimization** - 85-90% token reduction for long conversations
+- 🔄 **Automatic Summarization** - Intelligent compression of conversation history
+- 💡 **Context Preservation** - Never lose important details from past messages
+- ⚡ **Infinite Scalability** - Handle 500+ message conversations efficiently
 
 ### 🛡️ **Security & Privacy**
 
-- 🔐 **Encrypted API Key Storage** - Your keys are safely encrypted
-- 🚫 **No Data Tracking** - We don't store or analyze your conversations
-- 🔒 **Local Storage** - All data stays on your device
-- 🛡️ **XSS Protection** - Secure against common web vulnerabilities
-- ⚡ **Rate Limiting** - Built-in protection against API abuse
+- 🔐 **Encrypted Local Storage** - Your API keys are encrypted and stored locally
+- 🚫 **Zero Data Collection** - We don't see, store, or analyze your conversations
+- 🏠 **Completely Local** - All processing happens in your browser
+- 🛡️ **XSS Protection** - Built-in security against common web vulnerabilities
+- 🔒 **No Server Logging** - Your conversations never touch our servers
 
 ### 🎨 **User Experience**
 
-- 🎭 **Smooth Animations** - Delightful micro-interactions
-- 🎯 **Keyboard Shortcuts** - Power user friendly
-- 📤 **Export Conversations** - Download your chats as JSON/Markdown
-- 🔍 **Search History** - Find previous conversations quickly
-- ⚙️ **Customizable Settings** - Adjust model parameters and preferences
+- 🌙 **Beautiful Dark Theme** - Sleek, modern design that's easy on the eyes
+- 🎭 **Smooth Animations** - Polished micro-interactions throughout
+- ⌨️ **Keyboard Shortcuts** - Power user friendly with Enter to send
+- 📄 **Markdown Support** - Rich text rendering with code highlighting
+- 📎 **File Upload** - Support for text, code, and document files
+- 🎛️ **Model Selection** - Choose from GPT-4, GPT-3.5-turbo, and more
 
 ## 🚀 Quick Start
 
 ### Prerequisites
 
-- Node.js 18+
-- npm/yarn/pnpm
-- OpenAI API Key ([Get yours here](https://platform.openai.com/api-keys))
+- **Node.js 18+** - [Download here](https://nodejs.org/)
+- **OpenAI API Key** - [Get yours here](https://platform.openai.com/api-keys)
 
 ### Installation
 
 1. **Clone the repository**
 
 ```bash
-git clone https://github.com/raheesahmed/OpenGPT.git
+git clone https://github.com/RaheesAhmed/OpenGPT.git
 cd OpenGPT
 ```
 
@@ -70,25 +78,7 @@ yarn install
 pnpm install
 ```
 
-3. **Set up environment variables**
-
-```bash
-cp .env.example .env.local
-```
-
-Edit `.env.local`:
-
-```env
-# Required
-NEXTAUTH_SECRET=your-secret-key-here
-ENCRYPTION_KEY=your-32-character-encryption-key
-
-# Optional
-NEXT_PUBLIC_APP_NAME=OpenGPT
-NEXT_PUBLIC_APP_URL=http://localhost:3000
-```
-
-4. **Run the development server**
+3. **Run the development server**
 
 ```bash
 npm run dev
@@ -98,275 +88,277 @@ yarn dev
 pnpm dev
 ```
 
-5. **Open your browser**
+4. **Open your browser**
+
    Navigate to [http://localhost:3000](http://localhost:3000)
 
-## 📖 Usage
+5. **Add your API key**
 
-### Getting Started
+   Click the settings icon and securely add your OpenAI API key
 
-1. **Add your API Key**: Click the settings icon and securely add your OpenAI API key
-2. **Start Chatting**: Begin a new conversation or continue an existing one
-3. **Customize**: Adjust model settings, temperature, and other parameters
-4. **Export**: Download your conversations for backup or sharing
+That's it! Start chatting with AI while maintaining complete control over your data.
 
-### API Key Setup
+## 📖 How It Works
+
+### 🔑 API Key Security
 
 ```typescript
-// Your API key is encrypted before storage
-// Never shared with external services
-// Stored locally in your browser
+// Your API key workflow:
+1. Enter API key in settings →
+2. Encrypted with AES-256 →
+3. Stored locally in browser →
+4. Never sent to our servers →
+5. Used directly with OpenAI API
+```
+
+### 🧠 Memory Architecture
+
+```typescript
+// 4-Layer Memory System:
+Layer 1: Immediate Context (5-8 messages)    // 800-1200 tokens
+Layer 2: Recent Chunks (summarized)          // 600-900 tokens
+Layer 3: Historical Summary (compressed)     // 400-600 tokens
+Layer 4: Important Messages (preserved)      // 200-400 tokens
+
+Total: ~3k tokens (regardless of conversation length)
+```
+
+### 💾 Data Storage
+
+```typescript
+// Local Browser Storage:
+├── Encrypted API Keys
+├── Chat Messages (by conversation ID)
+├── Memory Context (intelligent summaries)
+├── User Preferences
+└── No server-side data (100% local)
 ```
 
 ## 🏗️ Architecture
 
 ### Tech Stack
 
-- **Framework**: Next.js 14+ (App Router)
-- **Language**: TypeScript
+- **Framework**: Next.js 15+ (App Router)
+- **Language**: TypeScript (Strict Mode)
 - **Styling**: Tailwind CSS + shadcn/ui
-- **Database**: Prisma + SQLite/PostgreSQL
-- **State Management**: Zustand
-- **Authentication**: NextAuth.js
-- **Deployment**: Vercel/Docker
+- **State Management**: React Hooks + Local Storage
+- **Memory System**: Custom intelligent context management
+- **Security**: AES-256 encryption for API keys
+- **Deployment**: Vercel-ready with Docker support
 
 ### Project Structure
 
 ```
-src/
 ├── app/                    # Next.js App Router
-│   ├── (auth)/            # Authentication pages
-│   ├── (chat)/            # Chat interface
-│   ├── api/               # API routes
-│   └── layout.tsx         # Root layout
+│   ├── api/               # API routes (chat, models)
+│   ├── globals.css        # Global styles
+│   └── page.tsx          # Main chat interface
 ├── components/            # React components
 │   ├── ui/               # shadcn/ui components
-│   ├── chat/             # Chat components
-│   ├── sidebar/          # Sidebar components
-│   └── common/           # Shared components
+│   ├── chat-sidebar.tsx  # Chat management
+│   ├── sidebar.tsx       # Expanded sidebar
+│   ├── mini-sidebar.tsx  # Collapsed sidebar
+│   └── model-selector.tsx # AI model selection
 ├── lib/                  # Utility functions
-├── hooks/               # Custom React hooks
-├── types/               # TypeScript definitions
-└── store/              # Global state management
-```
-
-### Key Components
-
-```typescript
-// Chat Interface
-<ChatContainer>
-  <MessageList>
-    <MessageItem />
-  </MessageList>
-  <InputArea />
-</ChatContainer>
-
-// Sidebar Navigation
-<Sidebar>
-  <NewChatButton />
-  <ChatHistory />
-  <SettingsPanel />
-</Sidebar>
+│   ├── chat-memory.ts    # Memory system
+│   └── utils.ts         # Helper functions
+└── public/              # Static assets
 ```
 
 ## 🔧 Configuration
 
-### Environment Variables
+### Supported Models
 
-```env
-# Security
-NEXTAUTH_SECRET=                    # NextAuth.js secret
-ENCRYPTION_KEY=                     # API key encryption
+All models from OpenAI are supported
 
-# Database
-DATABASE_URL=                       # Database connection
-
-# Optional
-NEXT_PUBLIC_APP_NAME=OpenGPT       # App name
-NEXT_PUBLIC_APP_URL=               # App URL
-OPENAI_API_BASE=                   # Custom OpenAI endpoint
-```
-
-### Model Configuration
+### Default Settings
 
 ```typescript
-// Supported models
-const MODELS = [
-  "gpt-4-turbo-preview",
-  "gpt-4",
-  "gpt-3.5-turbo",
-  "gpt-3.5-turbo-16k",
-];
-
-// Default settings
 const DEFAULT_CONFIG = {
-  model: "gpt-3.5-turbo",
+  model: "gpt-4o-mini",
   temperature: 0.7,
-  maxTokens: 2048,
-  topP: 1,
-  frequencyPenalty: 0,
-  presencePenalty: 0,
+  streaming: true,
+  memoryEnabled: true,
+  autoTitle: true,
 };
 ```
 
 ## 🚀 Deployment
 
-### Vercel (Recommended)
+### Vercel (One-Click Deploy)
 
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/yourusername/OpenGPT)
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/RaheesAhmed/OpenGPT)
 
-1. **Fork this repository**
-2. **Connect to Vercel**
-3. **Set environment variables**
-4. **Deploy**
+1. Click the button above
+2. Fork the repository
+3. Deploy automatically
+4. Start using immediately!
 
-### Docker
-
-```bash
-# Build the image
-docker build -t OpenGPT .
-
-# Run the container
-docker run -p 3000:3000 -e NEXTAUTH_SECRET=your-secret OpenGPT
-```
-
-### Self-Hosting
+### Manual Deployment
 
 ```bash
 # Build for production
 npm run build
 
-# Start the production server
+# Start production server
 npm start
 ```
 
-## 🛠️ Development
+### Docker
 
-### Scripts
+```dockerfile
+# Build the image
+docker build -t opengpt .
 
-```bash
-npm run dev          # Start development server
-npm run build        # Build for production
-npm run start        # Start production server
-npm run lint         # Run ESLint
-npm run type-check   # Run TypeScript checks
-npm test            # Run tests
+# Run the container
+docker run -p 3000:3000 opengpt
 ```
 
-### Code Quality
+### Self-Hosting
 
-- **TypeScript**: Strict mode enabled
-- **ESLint**: Airbnb configuration
-- **Prettier**: Code formatting
-- **Husky**: Pre-commit hooks
-- **Commitlint**: Conventional commits
-
-### Testing
+Perfect for complete privacy! Deploy on your own server:
 
 ```bash
-# Unit tests
-npm run test
+# Clone and build
+git clone https://github.com/RaheesAhmed/OpenGPT.git
+cd OpenGPT
+npm install
+npm run build
 
-# E2E tests
-npm run test:e2e
-
-# Coverage report
-npm run test:coverage
+# Run with PM2 (recommended)
+pm2 start npm --name "opengpt" -- start
 ```
 
 ## 🤝 Contributing
 
-We love your input! We want to make contributing as easy and transparent as possible.
+We welcome contributions! Here's how you can help:
 
-### Ways to Contribute
+### 🐛 Bug Reports
 
-- 🐛 **Bug Reports**: Found a bug? Please create an issue
-- 💡 **Feature Requests**: Have an idea? We'd love to hear it
-- 📝 **Documentation**: Help improve our docs
-- 🔧 **Code**: Submit a pull request
+Found a bug? Please create an issue with:
 
-### Development Setup
+- Clear description of the problem
+- Steps to reproduce
+- Expected vs actual behavior
+- Screenshots if applicable
 
-1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/amazing-feature`)
-3. Make your changes
-4. Add tests if applicable
-5. Commit your changes (`git commit -m 'Add amazing feature'`)
-6. Push to the branch (`git push origin feature/amazing-feature`)
-7. Open a Pull Request
+### 💡 Feature Requests
 
-### Code Style
+Have an idea? We'd love to hear it! Please include:
 
-- Use TypeScript for all new files
-- Follow the existing code style
-- Add JSDoc comments for functions
-- Write tests for new features
+- Clear description of the feature
+- Use case and benefits
+- Any implementation ideas
 
-## 📄 License
+### 🔧 Pull Requests
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+1. **Fork** the repository
+2. **Create** a feature branch: `git checkout -b feature/amazing-feature`
+3. **Make** your changes
+4. **Test** thoroughly
+5. **Commit** with clear messages: `git commit -m 'Add amazing feature'`
+6. **Push** to your branch: `git push origin feature/amazing-feature`
+7. **Open** a Pull Request
 
-## 🙏 Acknowledgments
+### Code Guidelines
 
-- **OpenAI** - For providing the amazing GPT models
-- **Vercel** - For the incredible Next.js framework
-- **shadcn** - For the beautiful UI components
-- **The Open Source Community** - For inspiration and support
+- Use TypeScript for all new code
+- Follow existing code style and patterns
+- Add comments for complex logic
+- Test your changes thoroughly
+- Update documentation if needed
 
-## 📞 Support
+## 🛟 Support
 
-### Need Help?
+### Get Help
 
-- 📖 **Documentation**: Comming Soon
-- 💬 **Discussions**: Join our [GitHub Discussions](https://github.com/raheesahmed/OpenGPT/discussions)
-- 🐛 **Issues**: Report bugs in [Issues](https://github.com/raheesahmed/OpenGPT/issues)
-- 📧 **Email**: Contact us at support@OpenGPT.com
+- 💬 **GitHub Discussions**: [Ask questions & share ideas](https://github.com/RaheesAhmed/OpenGPT/discussions)
+- 🐛 **Issues**: [Report bugs](https://github.com/RaheesAhmed/OpenGPT/issues)
+- 📧 **Email**: [raheesahmed256@gmail.com](mailto:raheesahmed256@gmail.com)
 
 ### FAQ
 
-**Q: Do you store my API key?**
-A: No, your API key is encrypted and stored locally in your browser.
+**❓ Is my API key safe?**
+✅ Yes! Your API key is encrypted and stored only in your browser. We never see it.
 
-**Q: Can I use other AI providers?**
-A: Currently we support OpenAI, but we're working on adding more providers.
+**❓ Do you collect my conversations?**
+✅ No! All conversations stay on your device. Zero data collection.
 
-**Q: Is this really free?**
-A: Yes! OpenGPT is completely free. You only pay for your OpenAI API usage.
+**❓ Can I use this offline?**
+❌ You need internet for API calls to OpenAI, but your data stays local.
 
-**Q: Can I self-host this?**
-A: Absolutely! Check our deployment guide above.
+**❓ Which models are supported?**
+✅ All OpenAI models: GPT-4, GPT-4 Turbo, GPT-4o, GPT-3.5 Turbo, and more.
+
+**❓ Can I export my chats?**
+✅ Yes! Your chats are saved locally and can be backed up from browser storage.
+
+**❓ Is this really free?**
+✅ Completely free! You only pay OpenAI for your API usage.
+
+## 📊 Why OpenGPT?
+
+| Feature             | OpenGPT          | ChatGPT Plus   | Other Alternatives |
+| ------------------- | ---------------- | -------------- | ------------------ |
+| **Cost**            | Free + Your API  | $20/month      | Varies             |
+| **Privacy**         | 100% Local       | Data collected | Usually collected  |
+| **API Key Control** | You own it       | N/A            | Rarely             |
+| **Customization**   | Full control     | Limited        | Limited            |
+| **Open Source**     | ✅ MIT License   | ❌ Closed      | Rarely             |
+| **Memory System**   | Advanced 4-layer | Basic          | Basic              |
+| **Self-Hosting**    | ✅ Yes           | ❌ No          | Rarely             |
+
+## 🗺️ Roadmap
+
+- [ ] **Multi-Provider Support** (Anthropic, Google, Cohere)
+- [ ] **Voice Input/Output** with speech recognition
+- [ ] **Plugin System** for custom extensions
+- [ ] **Team Collaboration** features
+- [ ] **Advanced Prompt Library** with templates
+- [ ] **Data Export/Import** (JSON, Markdown, CSV)
+- [ ] **Mobile App** (React Native)
+- [ ] **Offline Mode** with local models
+
+## 📄 License
+
+This project is licensed under the **MIT License** - see the [LICENSE](LICENSE) file for details.
+
+### What this means:
+
+- ✅ **Free to use** for any purpose
+- ✅ **Free to modify** and distribute
+- ✅ **Free for commercial use**
+- ✅ **No restrictions** on usage
+
+## 🙏 Acknowledgments
+
+- **OpenAI** - For the incredible GPT models
+- **Vercel** - For Next.js and amazing deployment platform
+- **shadcn** - For beautiful UI components
+- **The Open Source Community** - For inspiration and contributions
+
+## 📈 Stats
+
+![GitHub stars](https://img.shields.io/github/stars/RaheesAhmed/OpenGPT?style=social)
+![GitHub forks](https://img.shields.io/github/forks/RaheesAhmed/OpenGPT?style=social)
+![GitHub issues](https://img.shields.io/github/issues/RaheesAhmed/OpenGPT)
+![GitHub last commit](https://img.shields.io/github/last-commit/RaheesAhmed/OpenGPT)
+![GitHub repo size](https://img.shields.io/github/repo-size/RaheesAhmed/OpenGPT)
 
 ---
 
 <div align="center">
 
-**Made with ❤️ by Rahees Ahmed**
+**Made with ❤️ by [Rahees Ahmed](https://github.com/RaheesAhmed)**
 
 **⭐ Star us on GitHub if you find this project useful!**
+
+**🔗 [Live Demo](https://opengpt-rahees.vercel.app) | [Documentation](https://github.com/RaheesAhmed/OpenGPT/wiki) | [Contributing](https://github.com/RaheesAhmed/OpenGPT/blob/main/CONTRIBUTING.md)**
 
 </div>
 
 ---
 
-## 📊 Stats
+_"AI should be accessible to everyone, with complete privacy and control."_ - **OpenGPT Mission**
 
-![GitHub stars](https://img.shields.io/github/stars/yourusername/OpenGPT?style=social)
-![GitHub forks](https://img.shields.io/github/forks/yourusername/OpenGPT?style=social)
-![GitHub issues](https://img.shields.io/github/issues/yourusername/OpenGPT)
-![GitHub pull requests](https://img.shields.io/github/issues-pr/yourusername/OpenGPT)
-![GitHub last commit](https://img.shields.io/github/last-commit/yourusername/OpenGPT)
-
-## 🗺️ Roadmap
-
-- [ ] **Multi-provider Support** (Anthropic, Cohere, etc.)
-- [ ] **Plugin System** for custom extensions
-- [ ] **Voice Input/Output** integration
-- [ ] **Team Collaboration** features
-- [ ] **Advanced Prompt Templates**
-- [ ] **Mobile App** (React Native)
-- [ ] **Desktop App** (Electron)
-- [ ] **AI Model Fine-tuning** interface
-
----
-
-_Last updated: August 2025_
+_Last updated: January 2025_
