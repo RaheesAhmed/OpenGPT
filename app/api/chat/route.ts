@@ -60,7 +60,7 @@ export async function POST(request: NextRequest) {
       
       messageContent = fileContents + '\n\n' + message;
     }
-
+  
     // Create agent with dynamic instructions
     const agent = new Agent<UserContext>({
       name: 'OpenGPT',

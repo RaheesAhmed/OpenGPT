@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -68,6 +68,7 @@ export default function Home() {
   const [tempApiKey, setTempApiKey] = useState("");
   const [currentChatId, setCurrentChatId] = useState<string | null>(null);
   const [chats, setChats] = useState<Chat[]>([]);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
 
   // Load data from localStorage on component mount
   useEffect(() => {
@@ -150,6 +151,18 @@ export default function Home() {
       localStorage.setItem('openai_current_chat_id', currentChatId);
     }
   }, [currentChatId]);
+
+  // Auto-scroll to bottom when messages change or when loading
+  useEffect(() => {
+    const scrollToBottom = () => {
+      messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    };
+
+    if (messages.length > 0 || isLoading) {
+      // Small delay to ensure DOM is updated
+      setTimeout(scrollToBottom, 100);
+    }
+  }, [messages, isLoading]);
 
   // Generate a chat title based on the first user message
   const generateChatTitle = (msgs: Message[]): string => {
@@ -629,6 +642,9 @@ export default function Home() {
                   </div>
                 </div>
               )}
+              
+              {/* Auto-scroll target */}
+              <div ref={messagesEndRef} />
             </div>
           ) : (
             /* Welcome Section */
