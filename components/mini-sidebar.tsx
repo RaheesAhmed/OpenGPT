@@ -8,7 +8,10 @@ import {
   ChevronRight,
   Settings,
   User,
-  Sparkles
+  Sparkles,
+  Edit3,
+  Trash2,
+  MoreHorizontal
 } from "lucide-react";
 import {
   Tooltip,
@@ -29,6 +32,8 @@ interface MiniSidebarProps {
   chats: Chat[];
   onNewChat: () => void;
   onSelectChat: (chatId: string) => void;
+  onDeleteChat: (chatId: string) => void;
+  onRenameChat: (chatId: string, newTitle: string) => void;
   onToggle: () => void;
   onSettingsClick?: () => void;
   className?: string;
@@ -38,6 +43,8 @@ export function MiniSidebar({
   chats, 
   onNewChat, 
   onSelectChat, 
+  onDeleteChat,
+  onRenameChat,
   onToggle,
   onSettingsClick,
   className = "" 
@@ -149,10 +156,41 @@ export function MiniSidebar({
                     </Button>
                   </TooltipTrigger>
                   <TooltipContent side="right" className="bg-slate-800 text-white border-slate-700 max-w-xs">
-                    <div>
-                      <p className="font-medium truncate">{chat.title}</p>
-                      <p className="text-xs text-slate-400 truncate mt-1">{chat.lastMessage}</p>
-                      <p className="text-xs text-slate-500 mt-1">{formatTimestamp(chat.timestamp)}</p>
+                    <div className="space-y-2">
+                      <div>
+                        <p className="font-medium truncate">{chat.title}</p>
+                        <p className="text-xs text-slate-400 truncate mt-1">{chat.lastMessage}</p>
+                        <p className="text-xs text-slate-500 mt-1">{formatTimestamp(chat.timestamp)}</p>
+                      </div>
+                      <div className="flex items-center gap-2 pt-2 border-t border-slate-600">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            const newTitle = prompt("Rename chat:", chat.title);
+                            if (newTitle && newTitle.trim()) {
+                              onRenameChat(chat.id, newTitle.trim());
+                            }
+                          }}
+                          className="h-6 w-6 p-0 text-slate-400 hover:text-white hover:bg-slate-700"
+                        >
+                          <Edit3 className="w-3 h-3" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            if (confirm("Delete this chat?")) {
+                              onDeleteChat(chat.id);
+                            }
+                          }}
+                          className="h-6 w-6 p-0 text-slate-400 hover:text-red-400 hover:bg-slate-700"
+                        >
+                          <Trash2 className="w-3 h-3" />
+                        </Button>
+                      </div>
                     </div>
                   </TooltipContent>
                 </Tooltip>

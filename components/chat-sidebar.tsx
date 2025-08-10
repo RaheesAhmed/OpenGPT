@@ -42,7 +42,7 @@ export function ChatSidebar({
 
   if (isExpanded) {
     return (
-      <div className={`w-80 ${className}`}>
+      <div className={`w-72 ${className}`}>
         <Sidebar
           isOpen={isExpanded}
           onToggle={handleToggleSidebar}
@@ -63,6 +63,8 @@ export function ChatSidebar({
         chats={sortedChats}
         onNewChat={onNewChat}
         onSelectChat={onSelectChat}
+        onDeleteChat={onDeleteChat}
+        onRenameChat={onRenameChat}
         onToggle={handleToggleSidebar}
         onSettingsClick={onSettingsClick}
       />
