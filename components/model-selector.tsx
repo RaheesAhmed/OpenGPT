@@ -102,7 +102,7 @@ export function ModelSelector({ apiKey, selectedModel, onModelSelect }: ModelSel
       <DropdownMenuTrigger asChild>
         <Button 
           variant="secondary" 
-          className="bg-slate-700/40 text-slate-300 border-slate-600/50 px-3 py-1 rounded-xl hover:bg-slate-600/40 h-auto"
+          className="bg-[#1a1a1a] text-[#a1a1aa] border border-[#2a2a2a] px-3 py-1 rounded-lg hover:bg-[#2a2a2a] hover:text-white h-auto"
           disabled={isLoading}
         >
           {isLoading ? (
@@ -120,17 +120,17 @@ export function ModelSelector({ apiKey, selectedModel, onModelSelect }: ModelSel
       </DropdownMenuTrigger>
       <DropdownMenuContent 
         align="end" 
-        className="w-48 bg-slate-800/95 backdrop-blur-xl border-slate-700/50 max-h-[300px] overflow-y-auto"
+        className="w-48 bg-[#1a1a1a] border border-[#2a2a2a] max-h-[300px] overflow-y-auto"
       >
         {models.map((model) => (
           <DropdownMenuItem
             key={model.id}
             onClick={() => onModelSelect(model.id)}
-            className="text-slate-300 hover:text-white hover:bg-slate-700/50 cursor-pointer"
+            className="text-[#a1a1aa] hover:text-white hover:bg-[#2a2a2a] cursor-pointer"
           >
             <div className="flex flex-col">
               <span className="font-medium">{formatModelName(model.id)}</span>
-              <span className="text-xs text-slate-500">
+              <span className="text-xs text-[#6b7280]">
                 {!apiKey ? "Default" : `by ${model.owned_by}`}
               </span>
             </div>

@@ -97,16 +97,16 @@ export function MiniSidebar({
 
   return (
     <TooltipProvider>
-      <div className={`flex flex-col h-full w-16 bg-slate-900/95 backdrop-blur-sm border-r border-slate-700/50 ${className}`}>
+      <div className={`flex flex-col h-full w-16 bg-[#1a1a1a] border-r border-[#2a2a2a] ${className}`}>
         {/* Header */}
         <div className="flex flex-col items-center p-2 border-b border-slate-700/50">
           <Tooltip>
             <TooltipTrigger asChild>
-              <div className="w-8 h-8 bg-slate-700 rounded-lg flex items-center justify-center mb-2 cursor-pointer">
+              <div className="w-8 h-8 bg-[#2a2a2a] rounded-lg flex items-center justify-center mb-2 cursor-pointer">
                 <Sparkles className="w-4 h-4 text-white" />
               </div>
             </TooltipTrigger>
-            <TooltipContent side="right" className="bg-slate-800 text-white border-slate-700">
+            <TooltipContent side="right" className="bg-[#1a1a1a] text-white border-[#2a2a2a]">
               <p>OpenGPT</p>
             </TooltipContent>
           </Tooltip>
@@ -117,12 +117,12 @@ export function MiniSidebar({
                 onClick={onNewChat}
                 variant="ghost"
                 size="icon"
-                className="h-8 w-8 text-slate-400 hover:text-white hover:bg-slate-800/50 mb-2"
+                className="h-8 w-8 text-[#a1a1aa] hover:text-white hover:bg-[#2a2a2a] mb-2"
               >
                 <Plus className="w-4 h-4" />
               </Button>
             </TooltipTrigger>
-            <TooltipContent side="right" className="bg-slate-800 text-white border-slate-700">
+            <TooltipContent side="right" className="bg-[#1a1a1a] text-white border-[#2a2a2a]">
               <p>New Chat</p>
             </TooltipContent>
           </Tooltip>
@@ -133,12 +133,12 @@ export function MiniSidebar({
                 onClick={onToggle}
                 variant="ghost"
                 size="icon"
-                className="h-8 w-8 text-slate-400 hover:text-white hover:bg-slate-800/50"
+                className="h-8 w-8 text-[#a1a1aa] hover:text-white hover:bg-[#2a2a2a]"
               >
                 <ChevronRight className="w-4 h-4" />
               </Button>
             </TooltipTrigger>
-            <TooltipContent side="right" className="bg-slate-800 text-white border-slate-700">
+            <TooltipContent side="right" className="bg-[#1a1a1a] text-white border-[#2a2a2a]">
               <p>Expand Sidebar</p>
             </TooltipContent>
           </Tooltip>
@@ -162,12 +162,12 @@ export function MiniSidebar({
                       size="icon"
                       className={`h-10 w-10 rounded-lg transition-all duration-200 relative ${
                         chat.isActive 
-                          ? 'bg-slate-800/80 border border-slate-600/50 text-white' 
-                          : 'text-slate-400 hover:text-white hover:bg-slate-800/50'
+                          ? 'bg-[#2a2a2a] border border-[#3a3a3a] text-white' 
+                          : 'text-[#a1a1aa] hover:text-white hover:bg-[#2a2a2a]'
                       }`}
                     >
                       <div className="flex flex-col items-center justify-center">
-                        <div className="w-6 h-6 rounded-md flex items-center justify-center text-xs font-medium bg-slate-700 text-slate-300">
+                        <div className="w-6 h-6 rounded-md flex items-center justify-center text-xs font-medium bg-[#2a2a2a] text-[#a1a1aa]">
                           {getChatInitial(chat.title)}
                         </div>
                       </div>
@@ -177,14 +177,14 @@ export function MiniSidebar({
                       )}
                     </Button>
                   </TooltipTrigger>
-                  <TooltipContent side="right" className="bg-slate-800 text-white border-slate-700 max-w-xs">
+                  <TooltipContent side="right" className="bg-[#1a1a1a] text-white border-[#2a2a2a] max-w-xs">
                     <div className="space-y-2">
                       <div>
                         <p className="font-medium truncate">{chat.title}</p>
-                        <p className="text-xs text-slate-400 truncate mt-1">{chat.lastMessage}</p>
-                        <p className="text-xs text-slate-500 mt-1">{formatTimestamp(chat.timestamp)}</p>
+                        <p className="text-xs text-[#a1a1aa] truncate mt-1">{chat.lastMessage}</p>
+                        <p className="text-xs text-[#6b7280] mt-1">{formatTimestamp(chat.timestamp)}</p>
                       </div>
-                      <div className="flex items-center gap-2 pt-2 border-t border-slate-600">
+                      <div className="flex items-center gap-2 pt-2 border-t border-[#2a2a2a]">
                         <Button
                           variant="ghost"
                           size="sm"
@@ -195,7 +195,7 @@ export function MiniSidebar({
                               onRenameChat(chat.id, newTitle.trim());
                             }
                           }}
-                          className="h-6 w-6 p-0 text-slate-400 hover:text-white hover:bg-slate-700"
+                          className="h-6 w-6 p-0 text-[#a1a1aa] hover:text-white hover:bg-[#2a2a2a]"
                         >
                           <Edit3 className="w-3 h-3" />
                         </Button>
@@ -206,7 +206,7 @@ export function MiniSidebar({
                             e.stopPropagation();
                             handleDeleteClick(chat);
                           }}
-                          className="h-6 w-6 p-0 text-slate-400 hover:text-red-400 hover:bg-slate-700"
+                          className="h-6 w-6 p-0 text-[#a1a1aa] hover:text-red-400 hover:bg-[#2a2a2a]"
                         >
                           <Trash2 className="w-3 h-3" />
                         </Button>
@@ -227,12 +227,12 @@ export function MiniSidebar({
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="h-8 w-8 text-slate-400 hover:text-white hover:bg-slate-800/50"
+                  className="h-8 w-8 text-[#a1a1aa] hover:text-white hover:bg-[#2a2a2a]"
                 >
                   <User className="w-4 h-4" />
                 </Button>
               </TooltipTrigger>
-              <TooltipContent side="right" className="bg-slate-800 text-white border-slate-700">
+              <TooltipContent side="right" className="bg-[#1a1a1a] text-white border-[#2a2a2a]">
                 <p>Profile</p>
               </TooltipContent>
             </Tooltip>
@@ -243,12 +243,12 @@ export function MiniSidebar({
                   onClick={onSettingsClick}
                   variant="ghost"
                   size="icon"
-                  className="h-8 w-8 text-slate-400 hover:text-white hover:bg-slate-800/50"
+                  className="h-8 w-8 text-[#a1a1aa] hover:text-white hover:bg-[#2a2a2a]"
                 >
                   <Settings className="w-4 h-4" />
                 </Button>
               </TooltipTrigger>
-              <TooltipContent side="right" className="bg-slate-800 text-white border-slate-700">
+              <TooltipContent side="right" className="bg-[#1a1a1a] text-white border-[#2a2a2a]">
                 <p>Settings</p>
               </TooltipContent>
             </Tooltip>

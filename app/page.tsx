@@ -568,7 +568,7 @@ export default function Home() {
   };
 
   return (
-    <div className="h-screen bg-gradient-to-br from-slate-900 via-gray-900 to-slate-800 flex overflow-hidden hide-scrollbar">
+    <div className="h-screen bg-[#1e1e1e] text-white flex overflow-hidden">
       {/* Sidebar */}
       <ChatSidebar 
         chats={chats}
@@ -600,39 +600,39 @@ export default function Home() {
                 );
               })()}
               {messages.map((msg) => (
-                <div key={msg.id} className="flex justify-start">
-                  <div className="flex gap-3 max-w-[80%]">
-                    <div className="flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center bg-slate-700">
+                <div key={msg.id} className="group">
+                  <div className="flex gap-4 max-w-none">
+                    <div className="flex-shrink-0 w-7 h-7 rounded-full flex items-center justify-center bg-[#1a1a1a] border border-[#2a2a2a]">
                       {msg.role === 'user' ? (
-                        <User className="w-4 h-4 text-white" />
+                        <User className="w-3.5 h-3.5 text-[#a1a1aa]" />
                       ) : (
-                        <Sparkles className="w-4 h-4 text-white" />
+                        <Bot className="w-3.5 h-3.5 text-[#a1a1aa]" />
                       )}
                     </div>
-                    <div className="rounded-2xl px-4 py-3 text-slate-100">
-                      {msg.role === 'assistant' ? (
-                        <MarkdownRenderer 
-                          content={msg.content}
-                          onOpenArtifact={setCurrentArtifact}
-                        />
-                      ) : (
-                        <div className="text-sm leading-relaxed whitespace-pre-wrap">
-                          {msg.content}
-                        </div>
-                      )}
+                    <div className="flex-1 space-y-2">
+                      <div className="text-sm text-[#e5e7eb] leading-relaxed">
+                        {msg.role === 'assistant' ? (
+                          <MarkdownRenderer 
+                            content={msg.content}
+                            onOpenArtifact={setCurrentArtifact}
+                          />
+                        ) : (
+                          <div className="whitespace-pre-wrap">
+                            {msg.content}
+                          </div>
+                        )}
+                      </div>
                       {msg.files && msg.files.length > 0 && (
-                        <div className="mt-2 flex flex-wrap gap-2">
+                        <div className="flex flex-wrap gap-2">
                           {msg.files.map((file) => (
-                            <div key={file.id} className="inline-flex items-center gap-1 px-2 py-1 bg-slate-700/50 rounded text-xs">
+                            <div key={file.id} className="inline-flex items-center gap-1.5 px-2 py-1 bg-[#1a1a1a] border border-[#2a2a2a] rounded text-xs text-[#a1a1aa]">
                               <File className="w-3 h-3" />
                               <span>{file.name}</span>
                             </div>
                           ))}
                         </div>
                       )}
-                      <div className={`text-xs mt-2 ${
-                        msg.role === 'user' ? 'text-blue-200' : 'text-slate-400'
-                      }`}>
+                      <div className="text-xs text-[#6b7280] opacity-0 group-hover:opacity-100 transition-opacity">
                         {msg.timestamp.toLocaleTimeString()}
                       </div>
                     </div>
@@ -640,15 +640,15 @@ export default function Home() {
                 </div>
               ))}
               {isLoading && (
-                <div className="flex justify-start">
-                  <div className="flex gap-3 max-w-[80%]">
-                    <div className="flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center bg-slate-700">
-                      <Sparkles className="w-4 h-4 text-white" />
+                <div className="group">
+                  <div className="flex gap-4 max-w-none">
+                    <div className="flex-shrink-0 w-7 h-7 rounded-full flex items-center justify-center bg-[#1a1a1a] border border-[#2a2a2a]">
+                      <Bot className="w-3.5 h-3.5 text-[#a1a1aa]" />
                     </div>
-                    <div className="rounded-2xl px-4 py-3 bg-slate-800/50 border border-slate-700/50">
-                      <div className="flex items-center gap-2 text-slate-300">
+                    <div className="flex-1 space-y-2">
+                      <div className="flex items-center gap-3 text-sm text-[#a1a1aa]">
                         <Loader2 className="w-4 h-4 animate-spin" />
-                        <span className="text-sm">Thinking...</span>
+                        <span>Thinking...</span>
                       </div>
                     </div>
                   </div>
@@ -661,21 +661,13 @@ export default function Home() {
           ) : (
             /* Welcome Section */
             <div className="flex-1 flex flex-col items-center justify-center">
-              <div className="text-center mb-12">
-                <div className="mb-6">
-                  <h1 className="text-2xl md:text-3xl font-semibold text-white mb-2">
-                    Welcome to OpenGPT
-                  </h1>
-                  <div className="flex items-center justify-center gap-1 mt-2">
-                    {[...Array(3)].map((_, i) => (
-                      <div
-                        key={i}
-                        className="w-1 h-1 bg-slate-600 rounded-full animate-pulse"
-                        style={{ animationDelay: `${i * 200}ms` }}
-                      ></div>
-                    ))}
-                  </div>
-                </div>
+              <div className="text-center mb-16">
+                <h1 className="text-3xl font-medium text-white mb-3">
+                  OpenGPT
+                </h1>
+                <p className="text-[#a1a1aa] text-sm">
+                  How can I help you today?
+                </p>
               </div>
 
               {/* Chat Input Section - Centered on welcome */}
@@ -701,16 +693,16 @@ export default function Home() {
                   </div>
                 )}
                 
-                <div className="relative bg-slate-800/40 backdrop-blur-xl rounded-3xl border border-slate-700/30 shadow-2xl">
+                <div className="relative bg-[#1a1a1a] border border-[#2a2a2a] rounded-2xl">
                   <div className="flex items-center p-4 gap-3">
                     <div className="relative">
                       <Button 
                         variant="ghost" 
                         size="icon" 
-                        className="text-slate-400 hover:text-white hover:bg-slate-700/30 rounded-xl h-10 w-10 flex-shrink-0"
+                        className="text-[#a1a1aa] hover:text-white hover:bg-[#2a2a2a] rounded-lg h-9 w-9 flex-shrink-0"
                         onClick={() => document.getElementById('file-upload')?.click()}
                       >
-                        <Plus className="w-5 h-5" />
+                        <Plus className="w-4 h-4" />
                       </Button>
                       <input
                         id="file-upload"
@@ -724,16 +716,16 @@ export default function Home() {
                     
                     <div className="flex-1 min-w-0">
                       <textarea
-                        placeholder="How can I help you today?"
+                        placeholder="Message OpenGPT..."
                         value={message}
                         onChange={(e) => setMessage(e.target.value)}
                         onKeyPress={handleKeyPress}
                         rows={1}
-                        className="w-full bg-transparent text-white placeholder-slate-400 text-lg border-none outline-none resize-none focus:text-white min-h-[1.5rem] max-h-32 overflow-y-auto"
+                        className="w-full bg-transparent text-white placeholder-[#6b7280] text-sm border-none outline-none resize-none focus:text-white min-h-[1.25rem] max-h-32 overflow-y-auto"
                         style={{ 
                           color: 'white',
                           height: 'auto',
-                          minHeight: '1.5rem'
+                          minHeight: '1.25rem'
                         }}
                         onInput={(e) => {
                           const target = e.target as HTMLTextAreaElement;
@@ -743,7 +735,7 @@ export default function Home() {
                       />
                     </div>
                     
-                    <div className="flex items-center gap-3 flex-shrink-0">
+                    <div className="flex items-center gap-2 flex-shrink-0">
                       <ModelSelector 
                         apiKey={apiKey || undefined}
                         selectedModel={selectedModel}
@@ -753,7 +745,7 @@ export default function Home() {
                         onClick={handleSendMessage}
                         disabled={!message.trim() && uploadedFiles.length === 0}
                         size="icon"
-                        className="bg-slate-600/50 hover:bg-slate-500/50 disabled:opacity-30 disabled:cursor-not-allowed rounded-xl h-10 w-10 text-slate-300 hover:text-white transition-colors"
+                        className="bg-white hover:bg-gray-200 disabled:opacity-30 disabled:cursor-not-allowed rounded-lg h-8 w-8 text-black"
                       >
                         <ArrowUp className="w-4 h-4" />
                       </Button>
@@ -763,19 +755,16 @@ export default function Home() {
               </div>
 
               {/* Quick Actions */}
-              <div className="flex flex-wrap justify-center gap-3 mb-12">
+              <div className="flex flex-wrap justify-center gap-2 mb-12">
                 {quickActions.map((action) => (
                   <Button
                     key={action.label}
-                    variant="secondary"
-                    className="bg-slate-800/50 hover:bg-slate-700/50 border border-slate-700/50 text-slate-300 hover:text-white backdrop-blur-sm transition-all duration-200 h-auto p-4 flex flex-col items-center gap-2 min-w-[120px]"
-                    onClick={() => setMessage(action.label === 'Chat' ? '' : `Help me with ${action.label.toLowerCase()}: `)}
+                    variant="ghost"
+                    className="bg-[#1a1a1a] hover:bg-[#2a2a2a] border border-[#2a2a2a] text-[#a1a1aa] hover:text-white transition-colors h-auto px-4 py-3 flex items-center gap-2 text-sm"
+                    onClick={() => setMessage(`Help me with ${action.label.toLowerCase()}: `)}
                   >
-                    <action.icon className="w-5 h-5" />
-                    <div className="text-center">
-                      <div className="font-medium text-sm">{action.label}</div>
-                      <div className="text-xs text-slate-400">{action.description}</div>
-                    </div>
+                    <action.icon className="w-4 h-4" />
+                    {action.label}
                   </Button>
                 ))}
               </div>
@@ -842,16 +831,16 @@ export default function Home() {
                 </div>
               )}
               
-              <div className="relative bg-slate-800/40 backdrop-blur-xl rounded-3xl border border-slate-700/30 shadow-2xl">
+              <div className="relative bg-[#1a1a1a] border border-[#2a2a2a] rounded-2xl">
                 <div className="flex items-center p-4 gap-3">
                   <div className="relative">
                     <Button 
                       variant="ghost" 
                       size="icon" 
-                      className="text-slate-400 hover:text-white hover:bg-slate-700/30 rounded-xl h-10 w-10 flex-shrink-0"
+                      className="text-[#a1a1aa] hover:text-white hover:bg-[#2a2a2a] rounded-lg h-9 w-9 flex-shrink-0"
                       onClick={() => document.getElementById('file-upload-chat')?.click()}
                     >
-                      <Plus className="w-5 h-5" />
+                      <Plus className="w-4 h-4" />
                     </Button>
                     <input
                       id="file-upload-chat"
@@ -865,16 +854,16 @@ export default function Home() {
                   
                   <div className="flex-1 min-w-0">
                     <textarea
-                      placeholder="How can I help you today?"
+                      placeholder="Message OpenGPT..."
                       value={message}
                       onChange={(e) => setMessage(e.target.value)}
                       onKeyPress={handleKeyPress}
                       rows={1}
-                      className="w-full bg-transparent text-white placeholder-slate-400 text-lg border-none outline-none resize-none focus:text-white min-h-[1.5rem] max-h-32 overflow-y-auto"
+                      className="w-full bg-transparent text-white placeholder-[#6b7280] text-sm border-none outline-none resize-none focus:text-white min-h-[1.25rem] max-h-32 overflow-y-auto"
                       style={{ 
                         color: 'white',
                         height: 'auto',
-                        minHeight: '1.5rem'
+                        minHeight: '1.25rem'
                       }}
                       onInput={(e) => {
                         const target = e.target as HTMLTextAreaElement;
@@ -884,7 +873,7 @@ export default function Home() {
                     />
                   </div>
                   
-                  <div className="flex items-center gap-3 flex-shrink-0">
+                  <div className="flex items-center gap-2 flex-shrink-0">
                     <ModelSelector 
                       apiKey={apiKey || undefined}
                       selectedModel={selectedModel}
@@ -894,7 +883,7 @@ export default function Home() {
                       onClick={handleSendMessage}
                       disabled={!message.trim() && uploadedFiles.length === 0}
                       size="icon"
-                      className="bg-slate-600/50 hover:bg-slate-500/50 disabled:opacity-30 disabled:cursor-not-allowed rounded-xl h-10 w-10 text-slate-300 hover:text-white transition-colors"
+                      className="bg-white hover:bg-gray-200 disabled:opacity-30 disabled:cursor-not-allowed rounded-lg h-8 w-8 text-black"
                     >
                       <ArrowUp className="w-4 h-4" />
                     </Button>
@@ -916,13 +905,13 @@ export default function Home() {
 
       {/* Settings Modal */}
       <Dialog open={showSettings} onOpenChange={setShowSettings}>
-        <DialogContent className="bg-slate-900 border border-slate-700">
+        <DialogContent className="bg-[#1a1a1a] border border-[#2a2a2a]">
           <DialogHeader>
             <DialogTitle className="text-white flex items-center gap-2">
               <Key className="w-5 h-5" />
               Settings
             </DialogTitle>
-            <DialogDescription className="text-slate-400">
+            <DialogDescription className="text-[#a1a1aa]">
               Configure your OpenAI API key. It will be stored securely in your browser's local storage.
             </DialogDescription>
           </DialogHeader>
@@ -935,23 +924,23 @@ export default function Home() {
                 placeholder="sk-..."
                 value={tempApiKey}
                 onChange={(e) => setTempApiKey(e.target.value)}
-                className="bg-slate-800 border-slate-600 text-white placeholder-slate-400"
+                className="bg-[#2a2a2a] border border-[#3a3a3a] text-white placeholder-[#6b7280] focus:ring-1 focus:ring-[#3a3a3a] focus:border-[#3a3a3a]"
               />
-              <p className="text-xs text-slate-500"> 
-                Get your key from <a href="https://platform.openai.com/api-keys" target="_blank" className="text-slate-400 hover:underline">OpenAI Platform</a>.
+              <p className="text-xs text-[#6b7280]"> 
+                Get your key from <a href="https://platform.openai.com/api-keys" target="_blank" className="text-[#a1a1aa] hover:underline">OpenAI Platform</a>.
               </p>
             </div>
 
             {/* System Prompt Section */}
-            <div className="space-y-2 pt-4 border-t border-slate-700/50">
+            <div className="space-y-2 pt-4 border-t border-[#2a2a2a]">
               <label className="text-sm font-medium text-white">System Prompt</label>
-              <p className="text-xs text-slate-500 mb-3">
+              <p className="text-xs text-[#6b7280] mb-3">
                 Customize how the AI assistant behaves by setting a system prompt.
               </p>
               <Button
                 onClick={() => setShowSystemPrompt(true)}
                 variant="outline"
-                className="w-full border-slate-600 text-slate-300 hover:bg-slate-800 justify-start gap-2"
+                className="w-full border-[#2a2a2a] text-[#a1a1aa] hover:bg-[#2a2a2a] hover:text-white justify-start gap-2"
               >
                 <MessageSquare className="w-4 h-4" />
                 Configure System Prompt
@@ -960,10 +949,10 @@ export default function Home() {
           </div>
 
           <div className="flex justify-end gap-2">
-            <Button variant="outline" onClick={handleCancelSettings} className="border-slate-600 text-slate-300 hover:bg-slate-800">
+            <Button variant="outline" onClick={handleCancelSettings} className="border-[#2a2a2a] text-[#a1a1aa] hover:bg-[#2a2a2a] hover:text-white">
               Cancel
             </Button>
-            <Button onClick={handleSaveSettings} className="bg-slate-600 hover:bg-slate-700 text-white">
+            <Button onClick={handleSaveSettings} className="bg-white hover:bg-gray-200 text-black">
               <Save className="w-4 h-4 mr-2" />
               Save
             </Button>
