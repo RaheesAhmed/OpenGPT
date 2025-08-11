@@ -173,14 +173,44 @@ export default function Home() {
   // Auto-scroll to bottom when messages change or when loading
   useEffect(() => {
     const scrollToBottom = () => {
-      messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+      if (messagesEndRef.current) {
+        messagesEndRef.current.scrollIntoView({ behavior: "auto" });
+      }
     };
 
-    if (messages.length > 0 || isLoading) {
-      // Small delay to ensure DOM is updated
-      setTimeout(scrollToBottom, 100);
+    // Always scroll when message count changes (new messages added)
+    if (messages.length > 0) {
+      const timeout = setTimeout(scrollToBottom, 50);
+      return () => clearTimeout(timeout);
     }
-  }, [messages, isLoading]);
+  }, [messages.length]);
+
+  // Separate effect for streaming content updates - only scroll if user is near bottom
+  useEffect(() => {
+    if (messages.length > 0) {
+      const lastMessage = messages[messages.length - 1];
+      // Only handle streaming updates for assistant messages with content
+      if (lastMessage.role === 'assistant' && lastMessage.content) {
+        const scrollToBottom = () => {
+          if (messagesEndRef.current) {
+            const container = messagesEndRef.current.parentElement;
+            if (container) {
+              // Check if user is near the bottom before auto-scrolling during streaming
+              const isNearBottom = container.scrollTop + container.clientHeight >= container.scrollHeight - 150;
+              
+              if (isNearBottom) {
+                messagesEndRef.current.scrollIntoView({ behavior: "auto" });
+              }
+            }
+          }
+        };
+
+        // Throttle streaming scroll updates to reduce jumping
+        const timeoutId = setTimeout(scrollToBottom, 100);
+        return () => clearTimeout(timeoutId);
+      }
+    }
+  }, [messages]); // This handles content updates during streaming
 
   // Generate a chat title based on the first user message
   const generateChatTitle = (msgs: Message[]): string => {
