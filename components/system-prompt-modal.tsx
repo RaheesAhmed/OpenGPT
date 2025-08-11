@@ -75,13 +75,13 @@ export function SystemPromptModal({ isOpen, onClose }: SystemPromptModalProps) {
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="bg-slate-900 border border-slate-700 max-w-2xl max-h-[80vh] overflow-hidden flex flex-col">
+      <DialogContent className="bg-[#1a1a1a] border border-[#2a2a2a] max-w-2xl max-h-[80vh] overflow-hidden flex flex-col">
         <DialogHeader className="flex-shrink-0">
           <DialogTitle className="text-white flex items-center gap-2">
             <MessageSquare className="w-5 h-5" />
             System Prompt
           </DialogTitle>
-          <DialogDescription className="text-slate-400">
+          <DialogDescription className="text-[#a1a1aa]">
             Customize how the AI assistant behaves by setting a system prompt. This will be sent with every message to guide the AI's responses.
           </DialogDescription>
         </DialogHeader>
@@ -94,18 +94,18 @@ export function SystemPromptModal({ isOpen, onClose }: SystemPromptModalProps) {
               value={tempSystemPrompt}
               onChange={(e) => setTempSystemPrompt(e.target.value)}
               placeholder="Enter your custom system prompt here..."
-              className="bg-slate-800 border-slate-600 text-white placeholder-slate-400 min-h-[120px] resize-none"
+              className="bg-[#2a2a2a] border border-[#3a3a3a] text-white placeholder-[#6b7280] min-h-[120px] resize-none focus:ring-1 focus:ring-[#3a3a3a] focus:border-[#3a3a3a]"
               rows={6}
             />
             <div className="flex items-center justify-between">
-              <p className="text-xs text-slate-500">
+              <p className="text-xs text-[#6b7280]">
                 {tempSystemPrompt.length} characters
               </p>
               <Button
                 variant="ghost"
                 size="sm"
                 onClick={handleReset}
-                className="text-slate-400 hover:text-white text-xs"
+                className="text-[#a1a1aa] hover:text-white hover:bg-[#2a2a2a] text-xs"
               >
                 <RotateCcw className="w-3 h-3 mr-1" />
                 Clear
@@ -131,17 +131,17 @@ export function SystemPromptModal({ isOpen, onClose }: SystemPromptModalProps) {
           </div>
         </div>
 
-        <div className="flex justify-end gap-2 flex-shrink-0 pt-4 border-t border-slate-700/50">
+        <div className="flex justify-end gap-2 flex-shrink-0 pt-4 border-t border-[#2a2a2a]">
           <Button 
             variant="outline" 
             onClick={handleCancel} 
-            className="border-slate-600 text-slate-300 hover:bg-slate-800"
+            className="border-[#2a2a2a] text-[#a1a1aa] hover:bg-[#2a2a2a] hover:text-white"
           >
             Cancel
           </Button>
           <Button 
             onClick={handleSave} 
-            className="bg-slate-600 hover:bg-slate-700 text-white"
+            className="bg-white hover:bg-gray-200 text-black"
           >
             <Save className="w-4 h-4 mr-2" />
             Save System Prompt
