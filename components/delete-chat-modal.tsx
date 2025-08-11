@@ -30,7 +30,7 @@ export function DeleteChatModal({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="bg-slate-900 border border-slate-700 max-w-md">
+      <DialogContent className="bg-[#1a1a1a] border border-[#2a2a2a] max-w-md">
         <DialogHeader>
           <DialogTitle className="text-white flex items-center gap-3">
             <div className="w-10 h-10 rounded-full bg-red-500/10 border border-red-500/20 flex items-center justify-center">
@@ -38,15 +38,15 @@ export function DeleteChatModal({
             </div>
             <span>Delete Chat</span>
           </DialogTitle>
-          <DialogDescription className="text-slate-400 mt-4">
+          <DialogDescription className="text-[#a1a1aa] mt-4">
             Are you sure you want to delete this chat? This action cannot be undone.
           </DialogDescription>
         </DialogHeader>
         
         {/* Chat Preview */}
-        <div className="bg-slate-800/50 border border-slate-700/50 rounded-lg p-3 my-4">
+        <div className="bg-[#2a2a2a] border border-[#3a3a3a] rounded-lg p-3 my-4">
           <div className="flex items-center gap-2 text-sm">
-            <Trash2 className="w-4 h-4 text-slate-400" />
+            <Trash2 className="w-4 h-4 text-[#a1a1aa]" />
             <span className="text-white font-medium truncate">
               "{chatTitle}"
             </span>
@@ -58,7 +58,7 @@ export function DeleteChatModal({
           <Button
             variant="outline"
             onClick={onClose}
-            className="border-slate-600 text-slate-300 hover:bg-slate-800"
+            className="border-[#2a2a2a] text-[#a1a1aa] hover:bg-[#2a2a2a] hover:text-white"
           >
             Cancel
           </Button>

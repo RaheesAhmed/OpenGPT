@@ -105,14 +105,14 @@ export function ArtifactsPanel({ artifact, onClose }: ArtifactsPanelProps) {
 
   return (
     <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-      <div className="bg-slate-900 border border-slate-700 rounded-xl w-full max-w-4xl h-[80vh] flex flex-col shadow-2xl">
+      <div className="bg-[#1a1a1a] border border-[#2a2a2a] rounded-xl w-full max-w-4xl h-[80vh] flex flex-col shadow-2xl">
         {/* Header */}
-        <div className="flex items-center justify-between p-4 border-b border-slate-700/50">
+        <div className="flex items-center justify-between p-4 border-b border-[#2a2a2a]">
           <div className="flex items-center gap-3">
             {getIcon()}
             <div>
               <h2 className="text-white font-semibold">{artifact.title}</h2>
-              <div className="flex items-center gap-2 text-xs text-slate-400">
+              <div className="flex items-center gap-2 text-xs text-[#a1a1aa]">
                 <span>{getLanguageLabel()}</span>
                 {artifact.filename && (
                   <>
@@ -129,7 +129,7 @@ export function ArtifactsPanel({ artifact, onClose }: ArtifactsPanelProps) {
               onClick={handleCopy}
               variant="outline"
               size="sm"
-              className="border-slate-600 text-slate-300 hover:bg-slate-800"
+              className="border-[#2a2a2a] text-[#a1a1aa] hover:bg-[#2a2a2a] hover:text-white"
             >
               {copied ? (
                 <>
@@ -148,7 +148,7 @@ export function ArtifactsPanel({ artifact, onClose }: ArtifactsPanelProps) {
               onClick={handleDownload}
               variant="outline"
               size="sm"
-              className="border-slate-600 text-slate-300 hover:bg-slate-800"
+              className="border-[#2a2a2a] text-[#a1a1aa] hover:bg-[#2a2a2a] hover:text-white"
             >
               <Download className="w-4 h-4 mr-2" />
               Download
@@ -158,7 +158,7 @@ export function ArtifactsPanel({ artifact, onClose }: ArtifactsPanelProps) {
               onClick={onClose}
               variant="ghost"
               size="sm"
-              className="text-slate-400 hover:text-white hover:bg-slate-800"
+              className="text-[#a1a1aa] hover:text-white hover:bg-[#2a2a2a]"
             >
               <X className="w-4 h-4" />
             </Button>
@@ -167,7 +167,7 @@ export function ArtifactsPanel({ artifact, onClose }: ArtifactsPanelProps) {
 
         {/* Content */}
         <div className="flex-1 p-4 overflow-hidden">
-          <div className="h-full bg-slate-950/50 rounded-lg border border-slate-700/50 overflow-hidden">
+          <div className="h-full bg-[#2a2a2a] rounded-lg border border-[#3a3a3a] overflow-hidden">
             <SyntaxHighlighter
               language={artifact.language || 'text'}
               style={oneDark}
