@@ -29,7 +29,11 @@ import {
   Bot,
   Loader2,
   Key,
-  Save
+  Save,
+  Copy,
+  ThumbsUp,
+  ThumbsDown,
+  Check
 } from "lucide-react";
 import { MarkdownRenderer } from "@/components/markdown-renderer";
 import { SystemPromptModal } from "@/components/system-prompt-modal";
@@ -78,6 +82,11 @@ export default function Home() {
     content: string;
     filename?: string;
   } | null>(null);
+  
+  // State for button feedback
+  const [copiedMessageId, setCopiedMessageId] = useState<string | null>(null);
+  const [likedMessageId, setLikedMessageId] = useState<string | null>(null);
+  const [dislikedMessageId, setDislikedMessageId] = useState<string | null>(null);
 
   // Load data from localStorage on component mount
   useEffect(() => {
@@ -606,16 +615,26 @@ export default function Home() {
                       {msg.role === 'user' ? (
                         <User className="w-3.5 h-3.5 text-[#a1a1aa]" />
                       ) : (
-                        <Bot className="w-3.5 h-3.5 text-[#a1a1aa]" />
+                        <Sparkles className="w-3.5 h-3.5 text-[#a1a1aa]" />
                       )}
                     </div>
                     <div className="flex-1 space-y-2">
                       <div className="text-sm text-[#e5e7eb] leading-relaxed">
                         {msg.role === 'assistant' ? (
-                          <MarkdownRenderer 
-                            content={msg.content}
-                            onOpenArtifact={setCurrentArtifact}
-                          />
+                          msg.content ? (
+                            <MarkdownRenderer 
+                              content={msg.content}
+                              onOpenArtifact={setCurrentArtifact}
+                            />
+                          ) : (
+                            <div className="flex items-center text-sm text-[#a1a1aa]">
+                              <div className="flex space-x-1">
+                                <div className="w-1 h-1 bg-[#a1a1aa] rounded-full animate-pulse" style={{ animationDelay: '0s' }}></div>
+                                <div className="w-1 h-1 bg-[#a1a1aa] rounded-full animate-pulse" style={{ animationDelay: '0.2s' }}></div>
+                                <div className="w-1 h-1 bg-[#a1a1aa] rounded-full animate-pulse" style={{ animationDelay: '0.4s' }}></div>
+                              </div>
+                            </div>
+                          )
                         ) : (
                           <div className="whitespace-pre-wrap">
                             {msg.content}
@@ -632,6 +651,77 @@ export default function Home() {
                           ))}
                         </div>
                       )}
+                      
+                      {/* Action buttons for assistant messages */}
+                      {msg.role === 'assistant' && msg.content && (
+                        <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className={`h-7 w-7 rounded-lg transition-colors ${
+                              copiedMessageId === msg.id 
+                                ? 'text-green-400 bg-green-400/10' 
+                                : 'text-[#a1a1aa] hover:text-white hover:bg-[#2a2a2a]'
+                            }`}
+                            onClick={async () => {
+                              try {
+                                await navigator.clipboard.writeText(msg.content);
+                                setCopiedMessageId(msg.id);
+                                setTimeout(() => setCopiedMessageId(null), 2000);
+                              } catch (error) {
+                                console.error('Failed to copy message:', error);
+                              }
+                            }}
+                          >
+                            {copiedMessageId === msg.id ? (
+                              <Check className="w-3.5 h-3.5" />
+                            ) : (
+                              <Copy className="w-3.5 h-3.5" />
+                            )}
+                          </Button>
+                          
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className={`h-7 w-7 rounded-lg transition-colors ${
+                              likedMessageId === msg.id 
+                                ? 'text-green-400 bg-green-400/10' 
+                                : 'text-[#a1a1aa] hover:text-green-400 hover:bg-[#2a2a2a]'
+                            }`}
+                            onClick={() => {
+                              if (likedMessageId === msg.id) {
+                                setLikedMessageId(null); // Unlike
+                              } else {
+                                setLikedMessageId(msg.id);
+                                setDislikedMessageId(null); // Remove dislike if present
+                              }
+                            }}
+                          >
+                            <ThumbsUp className="w-3.5 h-3.5" />
+                          </Button>
+                          
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className={`h-7 w-7 rounded-lg transition-colors ${
+                              dislikedMessageId === msg.id 
+                                ? 'text-red-400 bg-red-400/10' 
+                                : 'text-[#a1a1aa] hover:text-red-400 hover:bg-[#2a2a2a]'
+                            }`}
+                            onClick={() => {
+                              if (dislikedMessageId === msg.id) {
+                                setDislikedMessageId(null); // Remove dislike
+                              } else {
+                                setDislikedMessageId(msg.id);
+                                setLikedMessageId(null); // Remove like if present
+                              }
+                            }}
+                          >
+                            <ThumbsDown className="w-3.5 h-3.5" />
+                          </Button>
+                        </div>
+                      )}
+                      
                       <div className="text-xs text-[#6b7280] opacity-0 group-hover:opacity-100 transition-opacity">
                         {msg.timestamp.toLocaleTimeString()}
                       </div>
@@ -639,21 +729,6 @@ export default function Home() {
                   </div>
                 </div>
               ))}
-              {isLoading && (
-                <div className="group">
-                  <div className="flex gap-4 max-w-none">
-                    <div className="flex-shrink-0 w-7 h-7 rounded-full flex items-center justify-center bg-[#1a1a1a] border border-[#2a2a2a]">
-                      <Bot className="w-3.5 h-3.5 text-[#a1a1aa]" />
-                    </div>
-                    <div className="flex-1 space-y-2">
-                      <div className="flex items-center gap-3 text-sm text-[#a1a1aa]">
-                        <Loader2 className="w-4 h-4 animate-spin" />
-                        <span>Thinking...</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              )}
               
               {/* Auto-scroll target */}
               <div ref={messagesEndRef} />
