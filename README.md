@@ -52,6 +52,17 @@ _OpenGPT's clean and intuitive interface - bringing the power of ChatGPT with co
 - 📎 **File Upload** - Support for text, code, and document files
 - 🎛️ **Model Selection** - Choose from GPT-4, GPT-3.5-turbo, and more
 
+### 🔧 **MCP Tools Integration**
+
+- 🔌 **Model Context Protocol** - Extend your agent with external tools and data sources
+- 📡 **Stdio Servers** - Local servers accessed via command line (npx, node, python)
+- 🌐 **HTTP Servers** - Remote or local servers with Streamable HTTP transport
+- 🔑 **Environment Variables** - Configure API tokens and credentials securely
+- 🛠️ **Tool Discovery** - Automatically discover and display available tools
+- 👁️ **Tool Visibility** - See all tool calls in real-time with collapsible dropdowns
+- ⚡ **Persistent Connections** - Servers connect once and stay alive
+- 📊 **Tool Results** - View arguments, results, and visited URLs
+
 ## 🚀 Quick Start
 
 ### Prerequisites
@@ -308,27 +319,11 @@ Have an idea? We'd love to hear it! Please include:
 | **Memory System**   | Advanced 4-layer | Basic          | Basic              |
 | **Self-Hosting**    | ✅ Yes           | ❌ No          | Rarely             |
 
-## 🗺️ Roadmap
-
-- [ ] **Multi-Provider Support** (Anthropic, Google, Cohere)
-- [ ] **Voice Input/Output** with speech recognition
-- [ ] **Plugin System** for custom extensions
-- [ ] **Team Collaboration** features
-- [ ] **Advanced Prompt Library** with templates
-- [ ] **Data Export/Import** (JSON, Markdown, CSV)
-- [ ] **Mobile App** (React Native)
-- [ ] **Offline Mode** with local models
 
 ## 📄 License
 
 This project is licensed under the **MIT License** - see the [LICENSE](LICENSE) file for details.
 
-### What this means:
-
-- ✅ **Free to use** for any purpose
-- ✅ **Free to modify** and distribute
-- ✅ **Free for commercial use**
-- ✅ **No restrictions** on usage
 
 ## 🙏 Acknowledgments
 
@@ -361,4 +356,3 @@ This project is licensed under the **MIT License** - see the [LICENSE](LICENSE) 
 
 _"AI should be accessible to everyone, with complete privacy and control."_ - **OpenGPT Mission**
 
-_Last updated: January 2025_
