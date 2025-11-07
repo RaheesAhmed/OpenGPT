@@ -99,21 +99,86 @@ export async function POST(request: NextRequest) {
           const encoder = new TextEncoder();
           
           try {
-            // Stream text output
-            const textStream = streamResult.toTextStream({ 
-              compatibleWithNodeStreams: false 
-            });
+            let textContent = '';
             
-            for await (const chunk of textStream) {
-              const data = JSON.stringify({
-                type: 'content',
-                content: chunk
-              });
-              controller.enqueue(encoder.encode(`data: ${data}\n\n`));
+            // Listen to all events for tool calls
+            for await (const event of streamResult) {
+              if (event.type === 'run_item_stream_event') {
+                const eventName = (event as any).name;
+                const item = (event as any).item;
+                
+                // Handle tool calls
+                if (eventName === 'tool_called' && item?.type === 'tool_call_item') {
+                  const rawItem = item.rawItem;
+                  
+                  // Extract query for web search or MCP tool args
+                  let toolArgs = '{}';
+                  let toolResult = 'Tool executed successfully';
+                  
+                  if (rawItem?.type === 'web_search_call' && rawItem?.action) {
+                    toolArgs = JSON.stringify(rawItem.action);
+                    toolResult = `Web search performed for: "${rawItem.action.query}"\n\nResults are integrated into the response below.`;
+                  } else if (rawItem?.type === 'hosted_tool_call' && rawItem?.providerData?.action) {
+                    toolArgs = JSON.stringify(rawItem.providerData.action);
+                    toolResult = `Search query: "${rawItem.providerData.action.query}"\n\nResults integrated into response.`;
+                  } else if (rawItem?.providerData) {
+                    toolArgs = JSON.stringify(rawItem.providerData);
+                  }
+                  
+                  // For MCP tools, try to get output
+                  if (rawItem?.output) {
+                    toolResult = rawItem.output;
+                  }
+                  
+                  const toolData = JSON.stringify({
+                    type: 'tool_call_done',
+                    tool_name: rawItem?.name || rawItem?.type || 'unknown',
+                    tool_call_id: rawItem?.id || Date.now().toString(),
+                    arguments: toolArgs,
+                    result: toolResult,
+                    status: rawItem?.status || 'completed'
+                  });
+                  controller.enqueue(encoder.encode(`data: ${toolData}\n\n`));
+                }
+                
+                // Handle message output - stream immediately
+                if (eventName === 'message_output_created' && item?.type === 'message_output_item') {
+                  const content = item.rawItem?.content;
+                  if (content && Array.isArray(content)) {
+                    for (const contentItem of content) {
+                      if (contentItem.type === 'output_text' && contentItem.text) {
+                        textContent = contentItem.text;
+                        
+                        // Extract URLs from annotations if available
+                        if (contentItem.annotations && Array.isArray(contentItem.annotations)) {
+                          const urls = contentItem.annotations
+                            .filter((ann: any) => ann.type === 'url_citation')
+                            .map((ann: any) => ({
+                              url: ann.url,
+                              title: ann.title
+                            }));
+                          
+                          if (urls.length > 0) {
+                            const urlsData = JSON.stringify({
+                              type: 'tool_urls',
+                              urls: urls
+                            });
+                            controller.enqueue(encoder.encode(`data: ${urlsData}\n\n`));
+                          }
+                        }
+                        
+                        // Send text content
+                        const data = JSON.stringify({
+                          type: 'content',
+                          content: textContent
+                        });
+                        controller.enqueue(encoder.encode(`data: ${data}\n\n`));
+                      }
+                    }
+                  }
+                }
+              }
             }
-            
-            // Wait for completion
-            await streamResult.completed;
             
             // Send completion signal
             const finishData = JSON.stringify({

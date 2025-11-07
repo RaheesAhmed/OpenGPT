@@ -39,14 +39,24 @@ import { MarkdownRenderer } from "@/components/markdown-renderer";
 import { SystemPromptModal } from "@/components/system-prompt-modal";
 import { MCPServerModal } from "@/components/mcp-server-modal";
 import { ArtifactsPanel } from "@/components/artifacts-panel";
+import { ToolCallDisplay } from "@/components/tool-call-display";
 import { chatMemory } from "@/lib/chat-memory";
 import { Brain, History } from "lucide-react";
+
+interface ToolCall {
+  id: string;
+  name: string;
+  arguments?: string;
+  result?: string;
+  status: 'in_progress' | 'completed';
+}
 
 interface Message {
   id: string;
   role: 'user' | 'assistant';
   content: string;
   timestamp: Date;
+  toolCalls?: ToolCall[];
   files?: Array<{
     name: string;
     type: string;
@@ -492,7 +502,8 @@ export default function Home() {
       id: assistantMessageId,
       role: 'assistant',
       content: '',
-      timestamp: new Date()
+      timestamp: new Date(),
+      toolCalls: []
     };
 
     setMessages(prev => [...prev, assistantMessage]);
@@ -566,6 +577,80 @@ export default function Home() {
                         ? { ...msg, content: accumulatedContent }
                         : msg
                     ));
+                  } else if (data.type === 'tool_call_started') {
+                    // Tool call started
+                    setMessages(prev => prev.map(msg => {
+                      if (msg.id === assistantMessageId) {
+                        const toolCalls = msg.toolCalls || [];
+                        return {
+                          ...msg,
+                          toolCalls: [...toolCalls, {
+                            id: data.tool_call_id,
+                            name: data.tool_name,
+                            status: 'in_progress' as const
+                          }]
+                        };
+                      }
+                      return msg;
+                    }));
+                  } else if (data.type === 'tool_call_done') {
+                    // Tool call completed - add or update
+                    setMessages(prev => prev.map(msg => {
+                      if (msg.id === assistantMessageId) {
+                        const toolCalls = msg.toolCalls || [];
+                        const existingIndex = toolCalls.findIndex(call => call.id === data.tool_call_id);
+                        
+                        let updatedToolCalls;
+                        if (existingIndex >= 0) {
+                          // Update existing
+                          updatedToolCalls = toolCalls.map(call =>
+                            call.id === data.tool_call_id
+                              ? {
+                                  ...call,
+                                  arguments: data.arguments,
+                                  result: data.result,
+                                  status: 'completed' as const
+                                }
+                              : call
+                          );
+                        } else {
+                          // Add new tool call
+                          updatedToolCalls = [...toolCalls, {
+                            id: data.tool_call_id,
+                            name: data.tool_name,
+                            arguments: data.arguments,
+                            result: data.result,
+                            status: 'completed' as const
+                          }];
+                        }
+                        
+                        return {
+                          ...msg,
+                          toolCalls: updatedToolCalls
+                        };
+                      }
+                      return msg;
+                    }));
+                  } else if (data.type === 'tool_urls') {
+                    // Update the last tool call with URLs
+                    setMessages(prev => prev.map(msg => {
+                      if (msg.id === assistantMessageId) {
+                        const toolCalls = msg.toolCalls || [];
+                        if (toolCalls.length > 0) {
+                          const lastCall = toolCalls[toolCalls.length - 1];
+                          const urlList = data.urls.map((u: any) => `• ${u.title}\n  ${u.url}`).join('\n\n');
+                          const updatedToolCalls = [...toolCalls.slice(0, -1), {
+                            ...lastCall,
+                            result: `Visited URLs:\n\n${urlList}`
+                          }];
+                          return {
+                            ...msg,
+                            toolCalls: updatedToolCalls
+                          };
+                        }
+                      }
+                      return msg;
+                    }));
                   } else if (data.type === 'done') {
                     // Streaming finished
                     break;
@@ -585,7 +670,7 @@ export default function Home() {
           reader.releaseLock();
         }
 
-        // If no content was streamed, show an error
+        // Check if we got content
         if (!accumulatedContent) {
           throw new Error('No response received from the server');
         }
@@ -662,6 +747,11 @@ export default function Home() {
                       )}
                     </div>
                     <div className="flex-1 space-y-2">
+                      {/* Tool calls display */}
+                      {msg.role === 'assistant' && msg.toolCalls && msg.toolCalls.length > 0 && (
+                        <ToolCallDisplay toolCalls={msg.toolCalls} />
+                      )}
+                      
                       <div className="text-sm text-[#e5e7eb] leading-relaxed">
                         {msg.role === 'assistant' ? (
                           msg.content ? (
