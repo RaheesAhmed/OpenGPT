@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { Agent, run, setDefaultOpenAIKey,webSearchTool } from '@openai/agents';
+import { Agent, run, setDefaultOpenAIKey, webSearchTool } from '@openai/agents';
+import { mcpManager, type MCPServerConfig } from '@/lib/mcp-manager';
 
 // Helper function to create a streaming response
 function createStreamingResponse(stream: ReadableStream) {
@@ -20,7 +21,7 @@ interface UserContext {
 
 export async function POST(request: NextRequest) {
   try {
-    const { message, files, memoryContext, apiKey, model = "gpt-4o-mini", stream = true, systemPrompt } = await request.json();
+    const { message, files, memoryContext, apiKey, model = "gpt-4o-mini", stream = true, systemPrompt, mcpServersConfig } = await request.json();
 
     // Validate required fields
     if (!message && (!files || files.length === 0)) {
@@ -39,6 +40,14 @@ export async function POST(request: NextRequest) {
 
     // Set OpenAI API key for the SDK
     setDefaultOpenAIKey(apiKey);
+
+    // Initialize or get existing MCP servers
+    let mcpServers = [];
+    if (mcpServersConfig && Array.isArray(mcpServersConfig) && mcpServersConfig.length > 0) {
+      mcpServers = await mcpManager.initializeServers(mcpServersConfig as MCPServerConfig[]);
+    } else {
+      mcpServers = mcpManager.getServers();
+    }
 
     // Build instructions dynamically
     let instructions = systemPrompt;
@@ -61,12 +70,13 @@ export async function POST(request: NextRequest) {
       messageContent = fileContents + '\n\n' + message;
     }
   
-    // Create agent with dynamic instructions
+    // Create agent with dynamic instructions and MCP servers
     const agent = new Agent<UserContext>({
       name: 'OpenGPT',
       instructions,
       model: model,
-      tools: [webSearchTool()]
+      tools: [webSearchTool()],
+      mcpServers: mcpServers.length > 0 ? mcpServers : undefined,
     });
 
     // Prepare context
@@ -121,6 +131,7 @@ export async function POST(request: NextRequest) {
             controller.enqueue(encoder.encode(`data: ${errorData}\n\n`));
           } finally {
             controller.close();
+            // Don't close MCP servers - they're managed by mcpManager
           }
         },
       });

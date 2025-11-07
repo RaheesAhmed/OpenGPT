@@ -37,6 +37,7 @@ import {
 } from "lucide-react";
 import { MarkdownRenderer } from "@/components/markdown-renderer";
 import { SystemPromptModal } from "@/components/system-prompt-modal";
+import { MCPServerModal } from "@/components/mcp-server-modal";
 import { ArtifactsPanel } from "@/components/artifacts-panel";
 import { chatMemory } from "@/lib/chat-memory";
 import { Brain, History } from "lucide-react";
@@ -70,6 +71,7 @@ export default function Home() {
   }>>([]);
   const [showSettings, setShowSettings] = useState(false);
   const [showSystemPrompt, setShowSystemPrompt] = useState(false);
+  const [showMcpServers, setShowMcpServers] = useState(false);
   const [tempApiKey, setTempApiKey] = useState("");
   const [currentChatId, setCurrentChatId] = useState<string | null>(null);
   const [chats, setChats] = useState<Chat[]>([]);
@@ -496,9 +498,19 @@ export default function Home() {
     setMessages(prev => [...prev, assistantMessage]);
 
     try {
-      // Load memory context and system prompt if available
+      // Load memory context, system prompt, and MCP servers if available
       const memoryContext = currentChatId ? chatMemory.loadContext(currentChatId) : '';
       const systemPrompt = localStorage.getItem('openai_system_prompt') || '';
+      const mcpServersConfig = localStorage.getItem('mcp_servers');
+      let mcpServers = [];
+      
+      if (mcpServersConfig) {
+        try {
+          mcpServers = JSON.parse(mcpServersConfig);
+        } catch (error) {
+          console.error('Error parsing MCP servers config:', error);
+        }
+      }
       
       const response = await fetch('/api/chat', {
         method: 'POST',
@@ -512,7 +524,8 @@ export default function Home() {
           systemPrompt: systemPrompt,
           apiKey: apiKey.trim(),
           model: selectedModel,
-          stream: true
+          stream: true,
+          mcpServersConfig: mcpServers.length > 0 ? mcpServers : undefined
         }),
       });
 
@@ -1051,6 +1064,22 @@ export default function Home() {
                 Configure System Prompt
               </Button>
             </div>
+
+            {/* MCP Servers Section */}
+            <div className="space-y-2 pt-4 border-t border-[#2a2a2a]">
+              <label className="text-sm font-medium text-white">MCP Servers</label>
+              <p className="text-xs text-[#6b7280] mb-3">
+                Add Model Context Protocol servers to extend your agent with external tools and resources.
+              </p>
+              <Button
+                onClick={() => setShowMcpServers(true)}
+                variant="outline"
+                className="w-full border-[#2a2a2a] text-[#a1a1aa] hover:bg-[#2a2a2a] hover:text-white justify-start gap-2"
+              >
+                <Settings className="w-4 h-4" />
+                Configure MCP Servers
+              </Button>
+            </div>
           </div>
 
           <div className="flex justify-end gap-2">
@@ -1069,6 +1098,12 @@ export default function Home() {
       <SystemPromptModal
         isOpen={showSystemPrompt}
         onClose={() => setShowSystemPrompt(false)}
+      />
+
+      {/* MCP Server Modal */}
+      <MCPServerModal
+        isOpen={showMcpServers}
+        onClose={() => setShowMcpServers(false)}
       />
 
       {/* Artifacts Panel */}
